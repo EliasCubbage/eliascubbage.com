@@ -148,6 +148,44 @@
     <div class="container">© <span id="year"></span> Elias Cubbage</div>
   </footer>
 
-  <script src="scripts.js"></script>
-</body>
+  <script>
+  (function(){
+    var canvas = document.getElementById('game-canvas');
+    if(!canvas) return;
+    var scoreLabel = document.getElementById('game-score');
+    var livesLabel = document.getElementById('game-lives');
+    var statusLabel = document.getElementById('game-status');
+    var startBtn = document.getElementById('game-start');
+    var resetBtn = document.getElementById('game-reset');
+    var ctx = canvas.getContext('2d');
+    var width = canvas.width; var height = canvas.height;
+    var keys = {left:false,right:false,shoot:false};
+    var player = {x:width/2-16,y:height-32,w:32,h:12,speed:4};
+    var bullets = [], enemies = [];
+    var frame=0, level=1, score=0, lives=3, gameOver=true, gameStarted=false, shootCooldown=0, enemyDirection=1;
+    function setStatus(t){ if(statusLabel) statusLabel.textContent=t; }
+    function setLabels(){ if(scoreLabel) scoreLabel.textContent=score; if(livesLabel) livesLabel.textContent=lives; }
+    function spawnWave(){ enemies=[]; var rows=2+Math.min(level,3); var cols=6; for(var row=0;row<rows;row++){ for(var col=0;col<cols;col++){ enemies.push({ x:30+col*46, y:30+row*28, w:28, h:14, alive:true }); }} enemyDirection=1; }
+    function startGame(){ player.x=width/2-16; bullets=[]; frame=0; level=1; score=0; lives=3; gameOver=false; gameStarted=true; shootCooldown=0; spawnWave(); setLabels(); setStatus('Use ← → and Space to shoot.'); }
+    function stopGame(){ gameStarted=false; gameOver=true; setStatus('Reset. Press Start to play.'); setLabels(); }
+    function drawRect(x,y,w,h,color){ ctx.fillStyle=color; ctx.fillRect(x,y,w,h); }
+    function drawPlayer(){ drawRect(player.x,player.y,player.w,player.h,'#e6eef6'); ctx.fillRect(player.x+12,player.y-6,8,6); }
+    function drawEnemies(){ enemies.forEach(function(e){ if(e.alive) drawRect(e.x,e.y,e.w,e.h,'#cfcfcf'); }); }
+    function drawBullets(){ bullets.forEach(function(b){ drawRect(b.x,b.y,b.w,b.h,'#8ae2ff'); }); }
+    function updateEnemies(){ var edge=false; enemies.forEach(function(enemy){ if(enemy.alive){ enemy.x += 0.5 * level * enemyDirection; if(enemy.x <= 10 || enemy.x + enemy.w >= width-10){ edge=true; } }}); if(edge){ enemyDirection *= -1; enemies.forEach(function(enemy){ if(enemy.alive){ enemy.y += 16; }}); } enemies.forEach(function(enemy){ if(enemy.alive && enemy.y + enemy.h >= player.y){ lives = 0; gameOver=true; setStatus('Game over — enemy reached you.'); }}); }
+    function updateBullets(){ bullets = bullets.filter(function(b){ return b.y > -10; }); bullets.forEach(function(b){ b.y -= b.speed; }); bullets.forEach(function(b){ enemies.forEach(function(enemy){ if(enemy.alive && b.x < enemy.x + enemy.w && b.x + b.w > enemy.x && b.y < enemy.y + enemy.h && b.y + b.h > enemy.y){ enemy.alive=false; b.hit=true; score += 10; setLabels(); }}); }); bullets = bullets.filter(function(b){ return !b.hit; }); }
+    function fireBullet(){ if(shootCooldown > 0) return; bullets.push({ x: player.x + player.w/2 - 2, y: player.y - 12, w:4, h:10, speed:6 }); shootCooldown = 14; }
+    function updatePlayer(){ if(keys.left && player.x > 8) player.x -= player.speed; if(keys.right && player.x + player.w < width-8) player.x += player.speed; if(keys.shoot) fireBullet(); if(shootCooldown > 0) shootCooldown -= 1; }
+    function updateFrame(){ if(!gameStarted || gameOver) return; updatePlayer(); updateBullets(); updateEnemies(); if(enemies.every(function(enemy){ return !enemy.alive; })){ level += 1; setStatus('Wave cleared! Level ' + level); spawnWave(); } if(lives <= 0){ gameOver = true; setStatus('Game over — press Reset to try again.'); } frame += 1; }
+    function drawFrame(){ ctx.clearRect(0,0,width,height); drawPlayer(); drawEnemies(); drawBullets(); ctx.strokeStyle='rgba(255,255,255,0.1)'; ctx.lineWidth=1; ctx.strokeRect(2,2,width-4,height-4); ctx.fillStyle='rgba(255,255,255,0.08)'; ctx.fillRect(0,height-20,width,20); ctx.fillStyle='#9e9e9e'; ctx.font='11px Inter, system-ui, sans-serif'; ctx.fillText('Level ' + level, 10, height-8); }
+    function loop(){ updateFrame(); drawFrame(); requestAnimationFrame(loop); }
+    loop();
+    window.addEventListener('keydown', function(e){ if(e.key==='ArrowLeft' || e.key==='a') keys.left=true; if(e.key==='ArrowRight' || e.key==='d') keys.right=true; if(e.key===' ' || e.key==='Spacebar'){ keys.shoot=true; e.preventDefault(); } });
+    window.addEventListener('keyup', function(e){ if(e.key==='ArrowLeft' || e.key==='a') keys.left=false; if(e.key==='ArrowRight' || e.key==='d') keys.right=false; if(e.key===' ' || e.key==='Spacebar') keys.shoot=false; });
+    if(startBtn) startBtn.addEventListener('click', function(){ if(!gameStarted || gameOver) startGame(); else setStatus('Game is already running.'); });
+    if(resetBtn) resetBtn.addEventListener('click', stopGame);
+    stopGame();
+  })();
+  </script>
+  <script src="app.js"></script>
 </html>
