@@ -50,15 +50,4 @@ html,body{height:100%}
 /* small, tasteful focus styles */
 :focus{outline:2px solid rgba(127,90,240,0.35);outline-offset:2px}
 
-/* Landing splash styles */
-.no-scroll{overflow:hidden}
-.splash{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#efefef,#d6d6d6);z-index:120;color:#071020}
-.splash-inner{background:rgba(255,255,255,0.97);padding:36px;border-radius:18px;display:flex;flex-direction:column;align-items:center;gap:12px;box-shadow:0 10px 30px rgba(2,6,23,0.6);transform:translateY(0);transition:opacity .45s ease,transform .45s ease}
-.splash-logo{width:108px;height:108px;border-radius:18px;background:linear-gradient(90deg,var(--accent),var(--accent-dark));display:flex;align-items:center;justify-content:center;font-weight:800;font-size:40px;color:#071020}
-.splash-tag{margin:0;color:#20303a;font-weight:600}
-.splash-hidden{opacity:0;transform:translateY(-8px);pointer-events:none}
 
-@media (max-width:600px){
-  .splash-inner{width:90%;padding:22px}
-  .splash-logo{width:84px;height:84px;font-size:32px}
-}
