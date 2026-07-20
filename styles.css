@@ -38,6 +38,12 @@ html,body{height:100%}
 .card h3{margin:0 0 8px}
 .card-actions{margin-top:12px}
 
+.game-card{margin-top:16px;padding:18px;border:1px solid rgba(255,255,255,0.08);border-radius:12px;background:rgba(255,255,255,0.03)}
+.game-controls{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.game-controls input{background:#0f1012;color:#e6eef6;border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:10px 12px;width:120px}
+.game-feedback{margin-top:14px;color:var(--accent);font-weight:600}
+.game-status{margin-top:8px;color:var(--muted)}
+
 .site-footer{padding:24px 0;color:var(--muted);text-align:center}
 
 @media (max-width:800px){

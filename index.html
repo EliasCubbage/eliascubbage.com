@@ -17,6 +17,7 @@
         <a href="#about">About</a>
         <a href="#projects">Projects</a>
         <a href="#experience">Experience</a>
+        <a href="#game">Game</a>
         <a href="#contact">Contact</a>
       </nav>
     </div>
@@ -43,6 +44,20 @@
             <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="Inter, system-ui, -apple-system, 'Segoe UI', Roboto" font-size="56" fill="#e6e6e6">EC</text>
           </svg>
         </div>
+      </div>
+    </section>
+
+    <section id="game" class="section container">
+      <h2>Mini game</h2>
+      <p>Try to guess the secret number from 1 to 10.</p>
+      <div class="game-card">
+        <div class="game-controls">
+          <input id="guess-input" type="number" min="1" max="10" placeholder="1-10" />
+          <button id="guess-btn" class="btn primary" type="button">Guess</button>
+          <button id="reset-game" class="btn ghost" type="button">Reset</button>
+        </div>
+        <p id="game-feedback" class="game-feedback">Pick a number to start.</p>
+        <p class="game-status">Attempts: <span id="attempts">0</span></p>
       </div>
     </section>
 
@@ -126,7 +141,7 @@
   </main>
 
   <footer class="site-footer">
-    <div class="container">© <span id="year"></span> Elias Cubbage — Built with care.</div>
+    <div class="container">© <span id="year"></span> Elias Cubbage</div>
   </footer>
 
   <script src="scripts.js"></script>
