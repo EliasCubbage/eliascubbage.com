@@ -37,6 +37,7 @@ document.addEventListener('DOMContentLoaded',function(){
     var score=0;
     var lives=3;
     var gameOver=true;
+    var gameStarted=false;
     var shootCooldown=0;
     var enemyDirection=1;
 
@@ -61,18 +62,26 @@ document.addEventListener('DOMContentLoaded',function(){
       enemyDirection=1;
     }
 
-    function resetGame(){
-      player.x=width/2-16;
-      bullets=[];
-      frame=0;
-      level=1;
-      score=0;
-      lives=3;
-      gameOver=false;
-      shootCooldown=0;
+    function startGame(){
+      player.x = width/2-16;
+      bullets = [];
+      frame = 0;
+      level = 1;
+      score = 0;
+      lives = 3;
+      gameOver = false;
+      gameStarted = true;
+      shootCooldown = 0;
       spawnWave();
       setLabels();
       setStatus('Use ← → and Space to shoot.');
+    }
+
+    function stopGame(){
+      gameStarted = false;
+      gameOver = true;
+      setStatus('Reset. Press Start to play.');
+      setLabels();
     }
 
     function drawRect(x,y,w,h,color){ ctx.fillStyle=color; ctx.fillRect(x,y,w,h); }
@@ -108,7 +117,7 @@ document.addEventListener('DOMContentLoaded',function(){
     }
 
     function updateFrame(){
-      if(gameOver){ return; }
+      if(!gameStarted || gameOver){ return; }
       updatePlayer();
       updateBullets();
       updateEnemies();
@@ -135,9 +144,16 @@ document.addEventListener('DOMContentLoaded',function(){
     window.addEventListener('keydown', function(e){ if(e.key==='ArrowLeft' || e.key==='a'){ keys.left=true; } if(e.key==='ArrowRight' || e.key==='d'){ keys.right=true; } if(e.key===' ' || e.key==='Spacebar'){ keys.shoot=true; e.preventDefault(); }});
     window.addEventListener('keyup', function(e){ if(e.key==='ArrowLeft' || e.key==='a'){ keys.left=false; } if(e.key==='ArrowRight' || e.key==='d'){ keys.right=false; } if(e.key===' ' || e.key==='Spacebar'){ keys.shoot=false; }});
 
-    startBtn.addEventListener('click', function(){ if(gameOver){ resetGame(); } else { setStatus('Game started'); } });
-    resetBtn.addEventListener('click', resetGame);
-    resetGame();
+    startBtn.addEventListener('click', function(){
+      if(!gameStarted || gameOver){
+        startGame();
+      } else {
+        setStatus('Game is already running.');
+      }
+    });
+    resetBtn.addEventListener('click', stopGame);
+    // initial UI state
+    stopGame();
   }
 
   // smooth scroll for internal links
