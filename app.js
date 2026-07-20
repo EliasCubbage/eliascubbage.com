@@ -1,12 +1,12 @@
 document.addEventListener('DOMContentLoaded',function(){
   'use strict';
 
-  // ── mobile nav toggle ──
+  // mobile nav toggle
   var toggle=document.getElementById('nav-toggle');
   var nav=document.getElementById('nav');
   if(toggle){ toggle.addEventListener('click',function(){ nav.classList.toggle('open'); }); }
 
-  // ── CV toggle ──
+  // CV toggle
   var cvToggle=document.querySelector('.cv-toggle');
   var cvPanel=document.querySelector('.cv-panel');
   if(cvToggle && cvPanel){
@@ -18,10 +18,10 @@ document.addEventListener('DOMContentLoaded',function(){
     });
   }
 
-  // ── dynamic year ──
+  // dynamic year
   var y=document.getElementById('year'); if(y) y.textContent=new Date().getFullYear();
 
-  // ── scroll-reveal with IntersectionObserver ──
+  // scroll-reveal with IntersectionObserver
   if('IntersectionObserver' in window){
     var observer=new IntersectionObserver(function(entries){
       entries.forEach(function(entry){
@@ -33,7 +33,7 @@ document.addEventListener('DOMContentLoaded',function(){
     document.querySelectorAll('.reveal').forEach(function(el){ el.classList.add('visible'); });
   }
 
-  // ── mini shooter game (Galaga-style) ──
+  // mini shooter game (Galaga-style)
   var canvas=document.getElementById('game-canvas');
   var scoreLabel=document.getElementById('game-score');
   var livesLabel=document.getElementById('game-lives');
@@ -53,7 +53,7 @@ document.addEventListener('DOMContentLoaded',function(){
     for(var si=0;si<60;si++){ stars.push({x:Math.random()*W,y:Math.random()*H,r:Math.random()*1.5+0.5,s:Math.random()*0.3+0.1}); }
     var frame=0,level=1,score=0,lives=5,gameOver=true,gameStarted=false,shootCooldown=0;
 
-    // ── high scores ──
+    // high scores
     var highScores=[];
     try{ var stored=localStorage.getItem('eliascubbage_highscores'); if(stored){ highScores=JSON.parse(stored); } }catch(e){}
     function saveHighScores(){ try{ localStorage.setItem('eliascubbage_highscores',JSON.stringify(highScores)); }catch(e){} }
@@ -81,7 +81,7 @@ document.addEventListener('DOMContentLoaded',function(){
     function setStatus(t){ statusLabel.textContent=t; }
     function setLabels(){ scoreLabel.textContent=score; livesLabel.textContent=lives; }
 
-    // ── enemy types ──
+    // enemy types
     var enemyTypes=[
       {w:28,h:16,bodyColor:'hsl(180,70%,55%)',coreColor:'hsl(180,50%,35%)',shape:'diamond'},
       {w:32,h:14,bodyColor:'hsl(40,80%,55%)',coreColor:'hsl(40,60%,35%)',shape:'wide'},
@@ -99,8 +99,7 @@ document.addEventListener('DOMContentLoaded',function(){
           var t=enemyTypes[typeIdx];
           var baseX=20+col*52;
           var baseY=20+row*30;
-          // each enemy gets a movement pattern
-          var pattern=Math.floor(Math.random()*3); // 0=sine, 1=circle, 2=zigzag
+          var pattern=Math.floor(Math.random()*3);
           enemies.push({
             x:baseX,y:baseY,w:t.w,h:t.h,
             bodyColor:t.bodyColor,coreColor:t.coreColor,shape:t.shape,
@@ -110,7 +109,7 @@ document.addEventListener('DOMContentLoaded',function(){
             phase:Math.random()*Math.PI*2,
             speed:0.3+level*0.05,
             shootTimer:60+Math.floor(Math.random()*120),
-            descent:0, // how far they've descended
+            descent:0,
             descending:true
           });
         }
@@ -120,7 +119,7 @@ document.addEventListener('DOMContentLoaded',function(){
     function startGame(){
       player.x=W/2-18; bullets=[]; enemyBullets=[]; frame=0; level=1; score=0; lives=5;
       gameOver=false; gameStarted=true; shootCooldown=0;
-      spawnWave(); setLabels(); setStatus('Use ← → and Space to shoot.');
+      spawnWave(); setLabels(); setStatus('Use arrows and Space to shoot.');
     }
 
     function stopGame(){
@@ -128,7 +127,7 @@ document.addEventListener('DOMContentLoaded',function(){
       setStatus('Reset. Press Start to play.'); setLabels();
     }
 
-    // ── profanity filter ──
+    // profanity filter
     var badWords=['fuck','shit','ass','bitch','cunt','dick','piss','cock','fag','slut','whore','bastard','damn','crap','penis','vagina','porn','xxx','fuk','fuq','sht','btch'];
     function isClean(str){
       var lower=str.toLowerCase();
@@ -160,7 +159,7 @@ document.addEventListener('DOMContentLoaded',function(){
       window.addEventListener('keydown',keyHandler);
     }
 
-    // ── drawing ──
+    // drawing
     function drawStars(){
       stars.forEach(function(s){
         s.y+=s.s; if(s.y>H){ s.y=-2; s.x=Math.random()*W; }
@@ -171,15 +170,10 @@ document.addEventListener('DOMContentLoaded',function(){
 
     function drawPlayer(){
       var px=player.x,py=player.y,pw=player.w,ph=player.h;
-      // fuselage
       ctx.fillStyle='#4a6fa5'; ctx.fillRect(px+4,py-10,pw-8,ph+10);
-      // wings
       ctx.fillStyle='#3a5a8a'; ctx.fillRect(px,py+2,pw,ph-6);
-      // wing tips
       ctx.fillStyle='#2a4a7a'; ctx.fillRect(px-4,py+4,4,ph-8); ctx.fillRect(px+pw,py+4,4,ph-8);
-      // canopy
       ctx.fillStyle='#8ae2ff'; ctx.fillRect(px+10,py-14,pw-20,6);
-      // engine glow
       if(gameStarted&&!gameOver){
         ctx.fillStyle='rgba(255,180,50,'+(0.4+Math.sin(frame*0.2)*0.2)+')';
         ctx.fillRect(px+8,py+ph-2,pw-16,5);
@@ -212,7 +206,6 @@ document.addEventListener('DOMContentLoaded',function(){
         ctx.fillStyle=e.coreColor;
         ctx.fillRect(e.x+6,cy-3,e.w-12,6);
       }
-      // eyes
       ctx.fillStyle='#ffe066';
       ctx.fillRect(e.x+6,e.y+3,4,4);
       ctx.fillRect(e.x+e.w-10,e.y+3,4,4);
@@ -240,38 +233,31 @@ document.addEventListener('DOMContentLoaded',function(){
       });
     }
 
-    // ── update logic ──
+    // update logic
     function updateEnemies(){
       enemies.forEach(function(e){
         if(!e.alive) return;
-        // descent phase: move down to formation
         if(e.descending && e.y<80+Math.floor(e.baseY/30)*20){
           e.y+=0.8;
         } else {
           e.descending=false;
         }
-
         if(!e.descending){
-          // geometric movement patterns
           var t=frame*0.02+e.phase;
-          if(e.pattern===0){ // sine wave
+          if(e.pattern===0){
             e.x=e.baseX+Math.sin(t*2)*30;
             e.y=e.baseY+Math.sin(t)*15;
-          } else if(e.pattern===1){ // circle / figure-8
+          } else if(e.pattern===1){
             e.x=e.baseX+Math.sin(t)*25;
             e.y=e.baseY+Math.cos(t*1.5)*20;
-          } else if(e.pattern===2){ // zigzag
+          } else if(e.pattern===2){
             e.x=e.baseX+Math.sin(t*3)*35;
             e.y=e.baseY+Math.abs(Math.sin(t*2))*18;
           }
         }
-
-        // shoot — only some enemies shoot, and less often
         if(!e.descending && Math.random()<0.02 && frame%60<10){
           enemyBullets.push({x:e.x+e.w/2-2,y:e.y+e.h,w:4,h:8,speed:2+level*0.2});
         }
-
-        // wrap to top if below screen
         if(e.y>H+20){
           e.y=-30;
           e.baseY=-30;
@@ -295,7 +281,7 @@ document.addEventListener('DOMContentLoaded',function(){
 
     function handleGameOver(){
       gameOver=true; gameStarted=false;
-      setStatus('Game over — score: '+score);
+      setStatus('Game over - score: '+score);
       if(checkHighScore(score)>=0) setTimeout(function(){promptInitials();},400);
     }
 
@@ -362,11 +348,7 @@ document.addEventListener('DOMContentLoaded',function(){
     window.addEventListener('keydown',function(e){
       if(e.key==='ArrowLeft'||e.key==='a'){ keys.left=true; }
       if(e.key==='ArrowRight'||e.key==='d'){ keys.right=true; }
-      if(e.key===' '||e.key==='Spacebar'){
-        e.preventDefault();
-        if(!gameStarted||gameOver){ startGame(); }
-        else { keys.shoot=true; }
-      }
+      if(e.key===' '||e.key==='Spacebar'){ keys.shoot=true; e.preventDefault(); }
     });
     window.addEventListener('keyup',function(e){
       if(e.key==='ArrowLeft'||e.key==='a'){ keys.left=false; }
@@ -382,7 +364,7 @@ document.addEventListener('DOMContentLoaded',function(){
     stopGame();
   }
 
-  // ── smooth scroll for internal links ──
+  // smooth scroll for internal links
   document.querySelectorAll('a[href^="#"]').forEach(function(a){
     a.addEventListener('click',function(e){
       var href=a.getAttribute('href');
