@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Elias Cubbage — Portfolio</title>
+  <meta name="description" content="Elias Cubbage — Developer portfolio showcasing projects, skills, and contact info." />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="splash" class="splash" role="dialog" aria-label="Welcome">
+    <div class="splash-inner">
+      <div class="splash-logo" aria-hidden="true">EC</div>
+      <p class="splash-tag">Elias Cubbage — Developer</p>
+      <button id="enter-site" class="btn primary">Enter</button>
+    </div>
+  </div>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="#">Elias C.</a>
+      <button id="nav-toggle" class="nav-toggle" aria-label="Toggle navigation">☰</button>
+      <nav id="nav" class="nav">
+        <a href="#about">About</a>
+        <a href="#projects">Projects</a>
+        <a href="#experience">Experience</a>
+        <a href="#contact">Contact</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="container hero-inner">
+        <div class="hero-content">
+          <h1>Hi — I'm Elias Cubbage</h1>
+          <p class="lead">Software engineer building polished web experiences. I focus on clean interfaces, performance, and accessibility.</p>
+          <p class="cta-row">
+            <a class="btn primary" href="#projects">See work</a>
+            <a class="btn ghost" href="#contact">Get in touch</a>
+          </p>
+          <p class="links-row">
+            <a class="chip" href="https://github.com/" target="_blank" rel="noopener">GitHub</a>
+            <a class="chip" href="https://www.linkedin.com/" target="_blank" rel="noopener">LinkedIn</a>
+          </p>
+        </div>
+        <div class="hero-visual" aria-hidden="true">
+          <svg width="220" height="220" viewBox="0 0 220 220" xmlns="http://www.w3.org/2000/svg">
+            <rect width="220" height="220" rx="28" fill="#2f2f2f" />
+            <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="Inter, system-ui, -apple-system, 'Segoe UI', Roboto" font-size="56" fill="#e6e6e6">EC</text>
+          </svg>
+        </div>
+      </div>
+    </section>
+
+    <section id="about" class="section container">
+      <h2>About</h2>
+      <p>I build front-end and full-stack projects with an emphasis on performance and thoughtful UX. I enjoy taking ideas from concept to production and learning new technologies along the way.</p>
+      <ul class="skills">
+        <li>JavaScript / TypeScript</li>
+        <li>React / Next.js</li>
+        <li>Node.js / Express</li>
+        <li>Accessibility & UX</li>
+      </ul>
+    </section>
+
+    <section id="projects" class="section container">
+      <h2>Selected Projects</h2>
+      <div class="projects-grid">
+        <article class="card">
+          <h3>Project One</h3>
+          <p>Fast, accessible UI for browsing data with live filters and keyboard support.</p>
+          <p class="card-actions"><a class="btn" href="#">View</a></p>
+        </article>
+
+        <article class="card">
+          <h3>Project Two</h3>
+          <p>Server-rendered app with auth, roles, and realtime updates.</p>
+          <p class="card-actions"><a class="btn" href="#">View</a></p>
+        </article>
+
+        <article class="card">
+          <h3>Project Three</h3>
+          <p>Design-to-production landing page with animations and analytics.</p>
+          <p class="card-actions"><a class="btn" href="#">View</a></p>
+        </article>
+      </div>
+    </section>
+
+    <section id="experience" class="section container">
+      <h2>Experience</h2>
+      <p>Worked on product teams, shipping features for web and mobile. Open to roles where I can contribute to product design and engineering.</p>
+      <p><a class="btn ghost" href="assets/resume.pdf" download>Download Resume</a></p>
+    </section>
+
+    <section id="contact" class="section container">
+      <h2>Contact</h2>
+      <p>If you'd like to work together or want a resume, email me at <a href="mailto:hello@eliascubbage.com">hello@eliascubbage.com</a> or use the links above.</p>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">© <span id="year"></span> Elias Cubbage — Built with care.</div>
+  </footer>
+
+  <script src="scripts.js"></script>
+</body>
+</html>
