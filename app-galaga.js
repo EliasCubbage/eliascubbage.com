@@ -348,7 +348,11 @@ document.addEventListener('DOMContentLoaded',function(){
     window.addEventListener('keydown',function(e){
       if(e.key==='ArrowLeft'||e.key==='a'){ keys.left=true; }
       if(e.key==='ArrowRight'||e.key==='d'){ keys.right=true; }
-      if(e.key===' '||e.key==='Spacebar'){ keys.shoot=true; e.preventDefault(); }
+      if(e.key===' '||e.key==='Spacebar'){
+        e.preventDefault();
+        if(!gameStarted||gameOver){ startGame(); }
+        else { keys.shoot=true; }
+      }
     });
     window.addEventListener('keyup',function(e){
       if(e.key==='ArrowLeft'||e.key==='a'){ keys.left=false; }
