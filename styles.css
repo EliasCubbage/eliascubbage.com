@@ -39,10 +39,11 @@ html,body{height:100%}
 .card-actions{margin-top:12px}
 
 .game-card{margin-top:16px;padding:18px;border:1px solid rgba(255,255,255,0.08);border-radius:12px;background:rgba(255,255,255,0.03)}
-.game-controls{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
-.game-controls input{background:#0f1012;color:#e6eef6;border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:10px 12px;width:120px}
-.game-feedback{margin-top:14px;color:var(--accent);font-weight:600}
-.game-status{margin-top:8px;color:var(--muted)}
+.game-info{display:flex;gap:24px;flex-wrap:wrap;align-items:center;justify-content:space-between;color:var(--muted);font-size:0.95rem;margin-bottom:14px}
+.game-status{color:var(--accent);font-weight:600}
+#game-canvas{width:100%;max-width:100%;background:#050506;border:1px solid rgba(255,255,255,0.12);border-radius:12px;display:block}
+.game-controls{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-top:14px}
+.game-instructions{margin-top:12px;color:var(--muted)}
 
 .site-footer{padding:24px 0;color:var(--muted);text-align:center}
 
