@@ -41,7 +41,7 @@ html,body{height:100%}
 .game-card{margin-top:16px;padding:18px;border:1px solid rgba(255,255,255,0.08);border-radius:12px;background:rgba(255,255,255,0.03);display:flex;flex-direction:column;align-items:center}
 .game-info{display:flex;gap:24px;flex-wrap:wrap;align-items:center;justify-content:space-between;color:var(--muted);font-size:0.95rem;margin-bottom:14px;width:100%}
 .game-status{color:var(--accent);font-weight:600}
-#game-canvas{display:block;width:100%;max-width:640px;height:auto;aspect-ratio:360/260;background:#050506;border:1px solid rgba(255,255,255,0.12);border-radius:12px;image-rendering:crisp-edges}
+#game-canvas{display:block;width:100%;max-width:640px;height:auto;aspect-ratio:360/500;background:#050506;border:1px solid rgba(255,255,255,0.12);border-radius:12px;image-rendering:crisp-edges}
 .game-controls{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-top:14px;justify-content:center}
 .game-instructions{margin-top:12px;color:var(--muted);text-align:center}
 
@@ -59,6 +59,32 @@ html,body{height:100%}
 .cv-item{margin-bottom:16px}
 .cv-item h4{margin:0 0 4px}
 .cv-item p{margin:4px 0}
+
+/* high scores table */
+.highscores{width:100%;max-width:360px;margin-top:16px;text-align:center}
+.highscores h3{margin:0 0 8px;font-size:0.95rem;color:var(--accent)}
+#highscore-list{list-style:decimal;padding:0 0 0 24px;margin:0;text-align:left;font-size:0.85rem;color:var(--muted)}
+#highscore-list li{display:flex;gap:12px;padding:3px 0;border-bottom:1px solid rgba(255,255,255,0.04)}
+#highscore-list li:last-child{border-bottom:0}
+.hs-place{min-width:20px;color:var(--accent-dark);font-weight:600}
+.hs-initials{flex:0 0 48px;font-family:monospace;font-weight:700;letter-spacing:2px;color:var(--accent)}
+.hs-score{flex:1;text-align:right;font-family:monospace;color:var(--accent)}
+#highscore-list li:first-child .hs-score{color:#ffd700}
+#highscore-list li:nth-child(2) .hs-score{color:#c0c0c0}
+#highscore-list li:nth-child(3) .hs-score{color:#cd7f32}
+
+/* initials entry overlay */
+.initials-overlay{position:fixed;inset:0;z-index:100;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.75);backdrop-filter:blur(4px)}
+.initials-overlay.open{display:flex}
+.initials-dialog{background:var(--card);border:1px solid rgba(255,255,255,0.12);border-radius:var(--radius);padding:24px;text-align:center;max-width:300px}
+.initials-dialog p{margin:0 0 12px;color:var(--accent)}
+.initials-dialog input{background:#050506;border:1px solid rgba(255,255,255,0.12);border-radius:8px;color:var(--accent);font-family:monospace;font-size:1.5rem;font-weight:700;letter-spacing:8px;text-align:center;text-transform:uppercase;padding:8px 12px;width:100%;max-width:120px;outline:none}
+.initials-dialog input:focus{border-color:var(--accent)}
+.initials-dialog .btn{margin-top:12px}
+
+/* scroll-reveal animations */
+.reveal{opacity:0;transform:translateY(24px);transition:opacity 0.6s ease,transform 0.6s ease}
+.reveal.visible{opacity:1;transform:translateY(0)}
 
 /* small, tasteful focus styles */
 :focus{outline:2px solid rgba(127,90,240,0.35);outline-offset:2px}

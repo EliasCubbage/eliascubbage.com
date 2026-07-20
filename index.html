@@ -3,8 +3,15 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Elias Cubbage — Portfolio</title>
-  <meta name="description" content="Elias Cubbage — Developer portfolio showcasing projects, skills, and contact info." />
+  <title>Elias Cubbage, Data Scientist & Automation Engineer</title>
+  <meta name="description" content="Elias Cubbage, data scientist, tax accountant, and automation engineer building ML systems and tools for fair housing compliance, financial workflows, and more." />
+  <meta property="og:title" content="Elias Cubbage, Data Scientist & Automation Engineer" />
+  <meta property="og:description" content="Building ML systems and automation tools to solve real problems, from fair housing compliance to financial workflows." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://eliascubbage.com" />
+  <meta property="og:locale" content="en_US" />
+  <meta name="twitter:card" content="summary" />
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%232f2f2f'/%3E%3Ctext x='16' y='22' text-anchor='middle' font-family='Inter,system-ui,sans-serif' font-size='16' font-weight='700' fill='%23e6eef6'%3EEC%3C/text%3E%3C/svg%3E" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
 </head>
@@ -47,7 +54,7 @@
       </div>
     </section>
 
-    <section id="about" class="section container">
+    <section id="about" class="section container reveal">
       <h2>About</h2>
       <p>I combine data science, machine learning, and financial expertise to build systems that scale. Experience building LLM-powered compliance tools and automation workflows for complex business problems. Currently working in tax accounting while developing automation and analytical solutions.</p>
       <ul class="skills">
@@ -60,7 +67,7 @@
       </ul>
     </section>
 
-    <section id="projects" class="section container">
+    <section id="projects" class="section container reveal">
       <h2>Selected Projects</h2>
       <div class="projects-grid">
         <article class="card">
@@ -83,7 +90,7 @@
       </div>
     </section>
 
-    <section id="experience" class="section container">
+    <section id="experience" class="section container reveal">
       <h2>Experience</h2>
       <p><strong>Data Scientist</strong> — Developed machine learning systems for fair housing compliance, focusing on NLP and violation detection in real estate listings.</p>
       <p><strong>Tax Accountant</strong> — Currently working in tax accounting, with expertise in compliance, automation, and financial analysis.</p>
@@ -119,12 +126,12 @@
       </div>
     </section>
 
-    <section id="contact" class="section container">
+    <section id="contact" class="section container reveal">
       <h2>Contact</h2>
       <p>If you'd like to work together, email me at <a href="mailto:elias.cubbage@gmail.com">elias.cubbage@gmail.com</a>.</p>
     </section>
 
-    <section id="game" class="section container">
+    <section id="game" class="section container reveal">
       <h2>Mini game</h2>
       <p>Try a small top-down shooter. Move with ← → and shoot with Space.</p>
       <div class="game-card">
@@ -133,12 +140,28 @@
           <div>Lives: <span id="game-lives">3</span></div>
           <div id="game-status">Press Start to play.</div>
         </div>
-        <canvas id="game-canvas" width="360" height="260" aria-label="Simple shooter game"></canvas>
+        <canvas id="game-canvas" width="360" height="500" aria-label="Galaga-style shooter game"></canvas>
         <div class="game-controls">
           <button id="game-start" class="btn primary" type="button">Start</button>
           <button id="game-reset" class="btn ghost" type="button">Reset</button>
         </div>
         <p class="game-instructions">Clear all enemies before they reach your ship.</p>
+        <div class="highscores" id="highscores">
+          <h3>High Scores</h3>
+          <ol id="highscore-list">
+            <li><span class="hs-place"></span><span class="hs-initials">---</span><span class="hs-score">0</span></li>
+            <li><span class="hs-place"></span><span class="hs-initials">---</span><span class="hs-score">0</span></li>
+            <li><span class="hs-place"></span><span class="hs-initials">---</span><span class="hs-score">0</span></li>
+          </ol>
+        </div>
+        <div id="initials-overlay" class="initials-overlay" hidden>
+          <div class="initials-dialog">
+            <p>New High Score!</p>
+            <p>Enter your initials:</p>
+            <input type="text" id="initials-input" maxlength="4" pattern="[A-Za-z0-9]{1,4}" autocomplete="off" />
+            <button id="initials-submit" class="btn primary" type="button">Save</button>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -148,44 +171,5 @@
     <div class="container">© <span id="year"></span> Elias Cubbage</div>
   </footer>
 
-  <script>
-  (function(){
-    var canvas = document.getElementById('game-canvas');
-    if(!canvas) return;
-    var scoreLabel = document.getElementById('game-score');
-    var livesLabel = document.getElementById('game-lives');
-    var statusLabel = document.getElementById('game-status');
-    var startBtn = document.getElementById('game-start');
-    var resetBtn = document.getElementById('game-reset');
-    var ctx = canvas.getContext('2d');
-    var width = canvas.width; var height = canvas.height;
-    var keys = {left:false,right:false,shoot:false};
-    var player = {x:width/2-16,y:height-32,w:32,h:12,speed:4};
-    var bullets = [], enemies = [];
-    var frame=0, level=1, score=0, lives=3, gameOver=true, gameStarted=false, shootCooldown=0, enemyDirection=1;
-    function setStatus(t){ if(statusLabel) statusLabel.textContent=t; }
-    function setLabels(){ if(scoreLabel) scoreLabel.textContent=score; if(livesLabel) livesLabel.textContent=lives; }
-    function spawnWave(){ enemies=[]; var rows=2+Math.min(level,3); var cols=6; for(var row=0;row<rows;row++){ for(var col=0;col<cols;col++){ enemies.push({ x:30+col*46, y:30+row*28, w:28, h:14, alive:true }); }} enemyDirection=1; }
-    function startGame(){ player.x=width/2-16; bullets=[]; frame=0; level=1; score=0; lives=3; gameOver=false; gameStarted=true; shootCooldown=0; spawnWave(); setLabels(); setStatus('Use ← → and Space to shoot.'); }
-    function stopGame(){ gameStarted=false; gameOver=true; setStatus('Reset. Press Start to play.'); setLabels(); }
-    function drawRect(x,y,w,h,color){ ctx.fillStyle=color; ctx.fillRect(x,y,w,h); }
-    function drawPlayer(){ drawRect(player.x,player.y,player.w,player.h,'#e6eef6'); ctx.fillRect(player.x+12,player.y-6,8,6); }
-    function drawEnemies(){ enemies.forEach(function(e){ if(e.alive) drawRect(e.x,e.y,e.w,e.h,'#cfcfcf'); }); }
-    function drawBullets(){ bullets.forEach(function(b){ drawRect(b.x,b.y,b.w,b.h,'#8ae2ff'); }); }
-    function updateEnemies(){ var edge=false; enemies.forEach(function(enemy){ if(enemy.alive){ enemy.x += 0.5 * level * enemyDirection; if(enemy.x <= 10 || enemy.x + enemy.w >= width-10){ edge=true; } }}); if(edge){ enemyDirection *= -1; enemies.forEach(function(enemy){ if(enemy.alive){ enemy.y += 16; }}); } enemies.forEach(function(enemy){ if(enemy.alive && enemy.y + enemy.h >= player.y){ lives = 0; gameOver=true; setStatus('Game over — enemy reached you.'); }}); }
-    function updateBullets(){ bullets = bullets.filter(function(b){ return b.y > -10; }); bullets.forEach(function(b){ b.y -= b.speed; }); bullets.forEach(function(b){ enemies.forEach(function(enemy){ if(enemy.alive && b.x < enemy.x + enemy.w && b.x + b.w > enemy.x && b.y < enemy.y + enemy.h && b.y + b.h > enemy.y){ enemy.alive=false; b.hit=true; score += 10; setLabels(); }}); }); bullets = bullets.filter(function(b){ return !b.hit; }); }
-    function fireBullet(){ if(shootCooldown > 0) return; bullets.push({ x: player.x + player.w/2 - 2, y: player.y - 12, w:4, h:10, speed:6 }); shootCooldown = 14; }
-    function updatePlayer(){ if(keys.left && player.x > 8) player.x -= player.speed; if(keys.right && player.x + player.w < width-8) player.x += player.speed; if(keys.shoot) fireBullet(); if(shootCooldown > 0) shootCooldown -= 1; }
-    function updateFrame(){ if(!gameStarted || gameOver) return; updatePlayer(); updateBullets(); updateEnemies(); if(enemies.every(function(enemy){ return !enemy.alive; })){ level += 1; setStatus('Wave cleared! Level ' + level); spawnWave(); } if(lives <= 0){ gameOver = true; setStatus('Game over — press Reset to try again.'); } frame += 1; }
-    function drawFrame(){ ctx.clearRect(0,0,width,height); drawPlayer(); drawEnemies(); drawBullets(); ctx.strokeStyle='rgba(255,255,255,0.1)'; ctx.lineWidth=1; ctx.strokeRect(2,2,width-4,height-4); ctx.fillStyle='rgba(255,255,255,0.08)'; ctx.fillRect(0,height-20,width,20); ctx.fillStyle='#9e9e9e'; ctx.font='11px Inter, system-ui, sans-serif'; ctx.fillText('Level ' + level, 10, height-8); }
-    function loop(){ updateFrame(); drawFrame(); requestAnimationFrame(loop); }
-    loop();
-    window.addEventListener('keydown', function(e){ if(e.key==='ArrowLeft' || e.key==='a') keys.left=true; if(e.key==='ArrowRight' || e.key==='d') keys.right=true; if(e.key===' ' || e.key==='Spacebar'){ keys.shoot=true; e.preventDefault(); } });
-    window.addEventListener('keyup', function(e){ if(e.key==='ArrowLeft' || e.key==='a') keys.left=false; if(e.key==='ArrowRight' || e.key==='d') keys.right=false; if(e.key===' ' || e.key==='Spacebar') keys.shoot=false; });
-    if(startBtn) startBtn.addEventListener('click', function(){ if(!gameStarted || gameOver) startGame(); else setStatus('Game is already running.'); });
-    if(resetBtn) resetBtn.addEventListener('click', stopGame);
-    stopGame();
-  })();
-  </script>
-  <script src="app.js"></script>
+  <script src="app.js?v=2"></script>
 </html>

@@ -1,8 +1,8 @@
-# eliascubbage.com — Portfolio
+# eliascubbage.com â€” Portfolio
 
 This site is deployed from GitHub Pages.
 
 ## Files
 - index.html
 - styles.css
-- scripts.js
+- app.js
