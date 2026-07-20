@@ -47,6 +47,12 @@ html,body{height:100%}
   .nav.open{display:flex}
 }
 
+.cv-toggle{cursor:pointer;margin-top:8px}
+.cv-panel{margin-top:16px;padding:18px;border:1px solid rgba(255,255,255,0.08);border-radius:12px;background:rgba(255,255,255,0.03)}
+.cv-item{margin-bottom:16px}
+.cv-item h4{margin:0 0 4px}
+.cv-item p{margin:4px 0}
+
 /* small, tasteful focus styles */
 :focus{outline:2px solid rgba(127,90,240,0.35);outline-offset:2px}
 
