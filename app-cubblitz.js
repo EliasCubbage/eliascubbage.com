@@ -123,8 +123,7 @@ document.addEventListener('DOMContentLoaded',function(){
     }
 
     function stopGame(){
-      gameStarted=false; gameOver=true;
-      setStatus('Reset. Press Start to play.'); setLabels();
+      gameStarted=false; gameOver=true; setLabels();
     }
 
     // profanity filter
