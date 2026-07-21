@@ -54,7 +54,6 @@ body{margin:0;font-family:Inter,system-ui,-apple-system,'Segoe UI',Roboto,Helvet
 .game-instructions{margin-top:12px;color:var(--muted);text-align:center}
 .site-footer{padding:24px 0;color:var(--muted);text-align:center}
 @media (max-width:800px){.hero-inner{flex-direction:column-reverse}.nav{display:none;flex-direction:column;gap:8px}.nav-toggle{display:inline-block}.nav.open{display:flex}}
-.cv-toggle{cursor:pointer;margin-top:8px}
 .cv-panel{margin-top:16px;padding:18px;border:1px solid rgba(255,255,255,0.08);border-radius:12px;background:rgba(255,255,255,0.03)}
 .cv-item{margin-bottom:16px}
 .cv-item h4{margin:0 0 4px}
@@ -90,7 +89,7 @@ body{margin:0;font-family:Inter,system-ui,-apple-system,'Segoe UI',Roboto,Helvet
       <nav id="nav" class="nav">
         <a href="#about">About</a>
         <a href="#projects">Projects</a>
-        <a href="#experience">Experience</a>
+        <a href="#professional">Background</a>
         <a href="#game">Cubblitz</a>
       </nav>
     </div>
@@ -150,14 +149,9 @@ body{margin:0;font-family:Inter,system-ui,-apple-system,'Segoe UI',Roboto,Helvet
         </article>
       </div>
     </section>
-    <section id="experience" class="section container reveal">
-      <h2>Experience</h2>
-      <p><strong>Data Scientist</strong> — Developed machine learning systems for fair housing compliance, focusing on NLP and violation detection in real estate listings.</p>
-      <p><strong>Tax Accountant</strong> — Currently working in tax accounting, with expertise in compliance, automation, and financial analysis.</p>
-      <p>Open to opportunities in data science, ML engineering, automation, and fintech roles.</p>
-      <p><button class="btn ghost cv-toggle" type="button" aria-expanded="false">View full CV</button></p>
-      <div class="cv-panel" hidden>
-        <h3>Professional Background</h3>
+    <section id="professional" class="section container reveal">
+      <h2>Professional Background</h2>
+      <div class="cv-panel">
         <div class="cv-item">
           <h4>Automation Engineer</h4>
           <p><em>David L. Mortimer CPA PC · Jan 2026 - Present</em></p>
@@ -226,13 +220,11 @@ body{margin:0;font-family:Inter,system-ui,-apple-system,'Segoe UI',Roboto,Helvet
   <footer class="site-footer">
     <div class="container">© <span id="year"></span> Elias Cubbage</div>
   </footer>
-  <script>
+<script>
 document.addEventListener('DOMContentLoaded',function(){
 'use strict';
 var toggle=document.getElementById('nav-toggle');var nav=document.getElementById('nav');
 if(toggle){toggle.addEventListener('click',function(){nav.classList.toggle('open');});}
-var cvToggle=document.querySelector('.cv-toggle');var cvPanel=document.querySelector('.cv-panel');
-if(cvToggle&&cvPanel){cvToggle.addEventListener('click',function(){var expanded=cvToggle.getAttribute('aria-expanded')==='true';cvToggle.setAttribute('aria-expanded',String(!expanded));cvPanel.hidden=expanded;cvToggle.textContent=expanded?'View full CV':'Hide CV';});}
 var y=document.getElementById('year');if(y)y.textContent=new Date().getFullYear();
 if('IntersectionObserver' in window){var observer=new IntersectionObserver(function(entries){entries.forEach(function(entry){if(entry.isIntersecting){entry.target.classList.add('visible');}});},{threshold:0.15});document.querySelectorAll('.reveal').forEach(function(el){observer.observe(el);});}else{document.querySelectorAll('.reveal').forEach(function(el){el.classList.add('visible');});}
 var canvas=document.getElementById('game-canvas');var scoreLabel=document.getElementById('game-score');var livesLabel=document.getElementById('game-lives');var statusLabel=document.getElementById('game-status');var startBtn=document.getElementById('game-start');var resetBtn=document.getElementById('game-reset');
