@@ -33,7 +33,7 @@ document.addEventListener('DOMContentLoaded',function(){
     document.querySelectorAll('.reveal').forEach(function(el){ el.classList.add('visible'); });
   }
 
-  // mini shooter game (Galaga-style)
+// Cubblitz shooter game
   var canvas=document.getElementById('game-canvas');
   var scoreLabel=document.getElementById('game-score');
   var livesLabel=document.getElementById('game-lives');

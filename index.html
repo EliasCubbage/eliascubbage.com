@@ -84,15 +84,14 @@ body{margin:0;font-family:Inter,system-ui,-apple-system,'Segoe UI',Roboto,Helvet
 </head>
 <body>
   <header class="site-header">
-    <div class="container header-inner">
-      <a class="brand" href="/">Home</a>
+<div class="container header-inner">
+        <a class="brand" href="/">Home</a>
       <button id="nav-toggle" class="nav-toggle" aria-label="Toggle navigation">☰</button>
       <nav id="nav" class="nav">
         <a href="#about">About</a>
         <a href="#projects">Projects</a>
         <a href="#experience">Experience</a>
-        <a href="#game">Game</a>
-        <a href="#contact">Contact</a>
+        <a href="#game">Cubblitz</a>
       </nav>
     </div>
   </header>
@@ -191,15 +190,15 @@ body{margin:0;font-family:Inter,system-ui,-apple-system,'Segoe UI',Roboto,Helvet
       <p>If you'd like to work together, email me at <a href="mailto:elias.cubbage@gmail.com">elias.cubbage@gmail.com</a>.</p>
     </section>
     <section id="game" class="section container reveal">
-      <h2>Mini game</h2>
-      <p>Try a small top-down shooter. Move with ← → and shoot with Space.</p>
+<h2>CUBBLITZ</h2>
+      <p>Press space to play.</p>
       <div class="game-card">
         <div class="game-info">
           <div>Score: <span id="game-score">0</span></div>
           <div>Lives: <span id="game-lives">3</span></div>
           <div id="game-status">Press Start to play.</div>
         </div>
-        <canvas id="game-canvas" width="360" height="500" aria-label="Galaga-style shooter game"></canvas>
+<canvas id="game-canvas" width="360" height="500" aria-label="Cubblitz game"></canvas>
         <div class="game-controls">
           <button id="game-start" class="btn primary" type="button">Start</button>
           <button id="game-reset" class="btn ghost" type="button">Reset</button>
