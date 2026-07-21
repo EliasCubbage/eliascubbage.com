@@ -242,7 +242,8 @@ for(var si=0;si<60;si++){stars.push({x:Math.random()*W,y:Math.random()*H,r:Math.
 var frame=0,level=1,score=0,lives=5,gameOver=true,gameStarted=false,shootCooldown=0;
 var highScores=[];
 try{var stored=localStorage.getItem('eliascubbage_highscores');if(stored){highScores=JSON.parse(stored);}}catch(e){}
-function saveHighScores(){try{localStorage.setItem('eliascubbage_highscores',JSON.stringify(highScores));}catch(e){}}
+function saveHighScores(){try{localStorage.setItem('eliascubbage_highscores',JSON.stringify(highScores));}catch(e){}
+}
 function renderHighScores(){var list=document.getElementById('highscore-list');if(!list)return;var lis=list.querySelectorAll('li');for(var i=0;i<3;i++){var hs=highScores[i];var isp=lis[i].querySelector('.hs-initials');var ssp=lis[i].querySelector('.hs-score');if(hs){isp.textContent=hs.i;ssp.textContent=hs.s;}else{isp.textContent='---';ssp.textContent='0';}}}
 function checkHighScore(sc){for(var i=0;i<3;i++){if(!highScores[i]||sc>highScores[i].s)return i;}return -1;}
 function addHighScore(initials,sc){var idx=checkHighScore(sc);if(idx<0)return;var entry={i:initials.toUpperCase().substring(0,4),s:sc};highScores.splice(idx,0,entry);if(highScores.length>3)highScores.length=3;saveHighScores();renderHighScores();}
@@ -274,6 +275,7 @@ window.addEventListener('keydown',function(e){if(e.key==='ArrowLeft'||e.key==='a
 startBtn.addEventListener('click',function(){if(!gameStarted||gameOver)startGame();else setStatus('Game is already running.');});resetBtn.addEventListener('click',stopGame);stopGame();
 }
 document.querySelectorAll('a[href^="#"]').forEach(function(a){a.addEventListener('click',function(e){var href=a.getAttribute('href');if(href.length>1){var el=document.querySelector(href);if(el){e.preventDefault();el.scrollIntoView({behavior:'smooth',block:'start'});if(nav){nav.classList.remove('open');}}}});});
+});
   </script>
 </body>
 </html>
