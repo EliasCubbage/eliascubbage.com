@@ -476,8 +476,11 @@ document.addEventListener('DOMContentLoaded',function(){
         if(b.hit) return;
         if(player.invuln<=0 && b.x<player.x+player.w&&b.x+b.w>player.x&&b.y<player.y+player.h&&b.y+b.h>player.y){
           b.hit=true;
-          lives-=1; setLabels(); shake=8; sfxPlayerHit();
-          spawnExplosion(player.x+player.w/2,player.y+player.h/2,'#4a6fa5',8);
+          lives-=1; setLabels(); shake=10; sfxPlayerHit();
+          spawnExplosion(player.x+player.w/2,player.y+player.h/2,'#ff4d2a',14);
+          spawnExplosion(player.x+player.w/2,player.y+player.h/2,'#ff9933',10);
+          spawnExplosion(player.x+player.w/2,player.y+player.h/2,'#ffcc00',8);
+          spawnExplosion(player.x+player.w/2,player.y+player.h/2,'#ffffff',6);
           player.invuln=120;
           combo=0;
           if(lives<=0){ handleGameOver(); }
