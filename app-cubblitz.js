@@ -58,6 +58,8 @@ document.addEventListener('DOMContentLoaded',function(){
     }
 
     var frame=0,level=1,score=0,lives=3,gameOver=true,gameStarted=false,gamePaused=false,shootCooldown=0,shake=0,combo=0,comboTimer=0;
+    // formation and dive state (Galaga-style lockstep)
+    var formationX=0, formationY=0, diveCountdown=0;
 
     // ===== AUDIO (Web Audio API) =====
     var audioCtx=null,muted=false;
@@ -197,24 +199,27 @@ document.addEventListener('DOMContentLoaded',function(){
         for(var col=0;col<cols;col++){
           var typeIdx=(row+col)%enemyTypes.length;
           var t=enemyTypes[typeIdx];
-          var baseX=20+col*52;
-          var baseY=20+row*30;
-          var pattern=Math.floor(Math.random()*3);
+          var gridX=20+col*52;
+          var gridY=20+row*30;
           enemies.push({
-            x:baseX,y:baseY,w:t.w,h:t.h,
+            x:gridX,y:gridY,w:t.w,h:t.h,
             bodyColor:t.bodyColor,coreColor:t.coreColor,shape:t.shape,
             alive:true,hp:t.hp,maxHp:t.hp,scoreVal:t.score,
-            baseX:baseX,baseY:baseY,
-            pattern:pattern,
-            phase:Math.random()*Math.PI*2,
-            speed:0.3+level*0.05,
-            shootTimer:60+Math.floor(Math.random()*120),
-            descent:0,
+            gridX:gridX,gridY:gridY,
             descending:true,
-            hitFlash:0
+            hitFlash:0,
+            // dive state
+            diving:false,
+            returning:false,
+            diveTargetX:0,diveTargetY:0,
+            diveSpeed:0,
+            returnTimer:0
           });
         }
       }
+      formationX=0;
+      formationY=0;
+      diveCountdown=120+Math.floor(Math.random()*60);
       // boss every 5 levels
       if(level%5===0){
         enemies.push({
@@ -222,8 +227,7 @@ document.addEventListener('DOMContentLoaded',function(){
           bodyColor:'hsl(0,80%,50%)',coreColor:'hsl(0,60%,30%)',shape:'boss',
           alive:true,hp:20+level*2,maxHp:20+level*2,scoreVal:200+level*10,
           baseX:W/2-40,baseY:30,
-          pattern:0,phase:0,speed:0.5,
-          shootTimer:30,descent:0,descending:false,hitFlash:0
+          phase:0,descending:false,hitFlash:0
         });
       }
     }
@@ -455,43 +459,125 @@ document.addEventListener('DOMContentLoaded',function(){
 
     // ===== UPDATE LOGIC =====
     function updateEnemies(){
+      // Global formation movement (Galaga-style lockstep)
+      formationX=Math.sin(frame*0.015)*40;
+      formationY=Math.sin(frame*0.02)*10;
+
+      // Dive countdown
+      if(diveCountdown>0) diveCountdown--;
+
+      // Collect alive non-boss enemies eligible for diving
+      var diveCandidates=[];
+      enemies.forEach(function(e){
+        if(e.alive && e.shape!=='boss' && !e.diving && !e.returning){
+          diveCandidates.push(e);
+        }
+      });
+
+      // Trigger dive attack if countdown expires
+      if(diveCountdown<=0 && diveCandidates.length>0){
+        var diveCount=Math.min(1+Math.floor(Math.random()*2), diveCandidates.length);
+        var shuffled=diveCandidates.slice();
+        for(var di=0;di<diveCount;di++){
+          var idx=Math.floor(Math.random()*shuffled.length);
+          var diver=shuffled[idx];
+          diver.diving=true;
+          diver.diveTargetX=player.x+player.w/2;
+          diver.diveTargetY=player.y+player.h/2+30;
+          diver.diveSpeed=2+Math.random()*1.5;
+          shuffled.splice(idx,1);
+        }
+        // Longer delay between dive waves (fewer bullets overall)
+        diveCountdown=240+Math.floor(Math.random()*120);
+      }
+
+      // Track how many enemies shoot this frame (cap at 1-2)
+      var shooterCount=0;
+
       enemies.forEach(function(e){
         if(!e.alive) return;
-        if(e.descending && e.y<80+Math.floor(e.baseY/30)*20){
+
+        // ===== BOSS =====
+        if(e.shape==='boss'){
+          if(!e.descending){
+            var t=frame*0.02+(e.phase||0);
+            e.x=(e.baseX||W/2-40)+Math.sin(t*0.5)*80;
+            e.y=(e.baseY||30)+Math.sin(t)*15;
+            // boss shoots rarely (much lower rate)
+            if(shooterCount<2 && Math.random()<0.008 && frame%90<15){
+              enemyBullets.push({x:e.x+e.w/2-2,y:e.y+e.h,w:4,h:8,speed:2+level*0.2,vx:0});
+              enemyBullets.push({x:e.x+e.w/2-2,y:e.y+e.h,w:4,h:8,speed:2+level*0.2,vx:-1});
+              enemyBullets.push({x:e.x+e.w/2-2,y:e.y+e.h,w:4,h:8,speed:2+level*0.2,vx:1});
+              shooterCount+=3;
+            }
+          }
+          return;
+        }
+
+        // ===== REGULAR ENEMIES =====
+
+        // Initial descent into formation
+        if(e.descending){
           e.y+=0.8;
-        } else {
-          e.descending=false;
-        }
-        if(!e.descending){
-          var t=frame*0.02+e.phase;
-          if(e.shape==='boss'){
-            e.x=e.baseX+Math.sin(t*0.5)*80;
-            e.y=e.baseY+Math.sin(t)*15;
-          } else if(e.pattern===0){
-            e.x=e.baseX+Math.sin(t*2)*30;
-            e.y=e.baseY+Math.sin(t)*15;
-          } else if(e.pattern===1){
-            e.x=e.baseX+Math.sin(t)*25;
-            e.y=e.baseY+Math.cos(t*1.5)*20;
-          } else if(e.pattern===2){
-            e.x=e.baseX+Math.sin(t*3)*35;
-            e.y=e.baseY+Math.abs(Math.sin(t*2))*18;
+          if(e.y>=e.gridY){
+            e.y=e.gridY;
+            e.descending=false;
           }
+          return;
         }
-        // shooting
-        var shootChance=e.shape==='boss'?0.04:0.02;
-        if(!e.descending && Math.random()<shootChance && frame%60<10){
-          if(e.shape==='boss'){
-            // boss triple shot
-            enemyBullets.push({x:e.x+e.w/2-2,y:e.y+e.h,w:4,h:8,speed:2+level*0.2,vx:0});
-            enemyBullets.push({x:e.x+e.w/2-2,y:e.y+e.h,w:4,h:8,speed:2+level*0.2,vx:-1});
-            enemyBullets.push({x:e.x+e.w/2-2,y:e.y+e.h,w:4,h:8,speed:2+level*0.2,vx:1});
+
+        // Diving toward player position
+        if(e.diving){
+          var dx=e.diveTargetX-e.x;
+          var dy=e.diveTargetY-e.y;
+          var dist=Math.sqrt(dx*dx+dy*dy);
+          if(dist>5){
+            e.x+=dx/dist*e.diveSpeed;
+            e.y+=dy/dist*e.diveSpeed;
+            // Diving enemies can shoot occasionally
+            if(shooterCount<2 && Math.random()<0.012){
+              enemyBullets.push({x:e.x+e.w/2-2,y:e.y+e.h,w:4,h:8,speed:2+level*0.2,vx:0});
+              shooterCount++;
+            }
           } else {
-            enemyBullets.push({x:e.x+e.w/2-2,y:e.y+e.h,w:4,h:8,speed:2+level*0.2,vx:0});
+            // Reached target, return to formation
+            e.diving=false;
+            e.returning=true;
+            e.returnTimer=30;
           }
+          return;
         }
-        if(e.y>H+20){
-          e.y=-30; e.baseY=-30; e.descending=true;
+
+        // Returning to formation after dive
+        if(e.returning){
+          if(e.returnTimer>0){
+            e.returnTimer--;
+          } else {
+            var tx=e.gridX+formationX;
+            var ty=e.gridY+formationY;
+            var dx2=tx-e.x;
+            var dy2=ty-e.y;
+            var dist2=Math.sqrt(dx2*dx2+dy2*dy2);
+            if(dist2>3){
+              e.x+=dx2/dist2*2;
+              e.y+=dy2/dist2*2;
+            } else {
+              e.x=tx;
+              e.y=ty;
+              e.returning=false;
+            }
+          }
+          return;
+        }
+
+        // Normal formation position (lockstep — all move together)
+        e.x=e.gridX+formationX;
+        e.y=e.gridY+formationY;
+
+        // Very limited shooting from formation
+        if(shooterCount<1 && Math.random()<0.0015 && frame%240<20){
+          enemyBullets.push({x:e.x+e.w/2-2,y:e.y+e.h,w:4,h:8,speed:2+level*0.2,vx:0});
+          shooterCount++;
         }
       });
     }
