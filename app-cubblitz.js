@@ -88,6 +88,15 @@ document.addEventListener('DOMContentLoaded',function(){
     function sfxGameOver(){ beep(440,0.2,'sawtooth',0.1); setTimeout(function(){beep(330,0.2,'sawtooth',0.1);},200); setTimeout(function(){beep(220,0.4,'sawtooth',0.1);},400); }
 
     // ===== HIGH SCORES =====
+    var GITHUB_TOKEN='';
+    var GIST_ID='';
+    try{
+      if(window.CUBBLITZ_CONFIG){
+        GITHUB_TOKEN=window.CUBBLITZ_CONFIG.githubToken||'';
+        GIST_ID=window.CUBBLITZ_CONFIG.gistId||'';
+      }
+    }catch(e){}
+    var cloudEnabled=!!(GITHUB_TOKEN && GIST_ID);
     var highScores=[];
     try{ var stored=localStorage.getItem('eliascubbage_highscores'); if(stored){ highScores=JSON.parse(stored); } }catch(e){}
     function saveHighScores(){ try{ localStorage.setItem('eliascubbage_highscores',JSON.stringify(highScores)); }catch(e){} }
@@ -105,12 +114,59 @@ document.addEventListener('DOMContentLoaded',function(){
     }
     function checkHighScore(sc){ for(var i=0;i<3;i++){ if(!highScores[i]||sc>highScores[i].s) return i; } return -1; }
     function addHighScore(initials,sc){
-      var idx=checkHighScore(sc); if(idx<0) return;
+      var idx=checkHighScore(sc); if(idx<0) return false;
       var entry={i:initials.toUpperCase().substring(0,4),s:sc};
       highScores.splice(idx,0,entry); if(highScores.length>3) highScores.length=3;
       saveHighScores(); renderHighScores();
+      // try cloud sync
+      postToCloud();
+      return true;
+    }
+    function postToCloud(){
+      if(!cloudEnabled) return;
+      try{
+        var xhr=new XMLHttpRequest();
+        xhr.open('PATCH','https://api.github.com/gists/'+GIST_ID,true);
+        xhr.setRequestHeader('Authorization','token '+GITHUB_TOKEN);
+        xhr.setRequestHeader('Content-Type','application/json');
+        var payload={
+          description:'Cubblitz high scores',
+          files:{
+            'scores.json':{
+              content:JSON.stringify(highScores.slice(0,10),null,2)
+            }
+          }
+        };
+        xhr.send(JSON.stringify(payload));
+      }catch(e){}
+    }
+    function syncFromCloud(){
+      if(!cloudEnabled) return;
+      try{
+        var xhr=new XMLHttpRequest();
+        xhr.open('GET','https://api.github.com/gists/'+GIST_ID,true);
+        xhr.setRequestHeader('Authorization','token '+GITHUB_TOKEN);
+        xhr.onreadystatechange=function(){
+          if(xhr.readyState===4 && xhr.status===200){
+            try{
+              var gist=JSON.parse(xhr.responseText);
+              var file=gist.files['scores.json'];
+              if(file && file.content){
+                var data=JSON.parse(file.content);
+                if(Array.isArray(data) && data.length>0){
+                  highScores=data.slice(0,3);
+                  saveHighScores();
+                }
+              }
+            }catch(e){}
+            renderHighScores();
+          }
+        };
+        xhr.send(null);
+      }catch(e){}
     }
     renderHighScores();
+    syncFromCloud();
 
     function setStatus(t){ statusLabel.textContent=t; }
     function setLabels(){ scoreLabel.textContent=score; livesLabel.textContent=lives; if(levelLabel) levelLabel.textContent=level; }
