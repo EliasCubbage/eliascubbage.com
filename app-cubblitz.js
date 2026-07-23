@@ -252,10 +252,10 @@ document.addEventListener('DOMContentLoaded',function(){
 
     // ===== POWER-UPS =====
     var powerTypes=[
-      {type:'rapid',color:'hsl(180,80%,55%)',label:'R'},
-      {type:'spread',color:'hsl(40,80%,55%)',label:'S'},
-      {type:'shield',color:'hsl(280,60%,55%)',label:'D'},
-      {type:'life',color:'hsl(120,70%,55%)',label:'+'}
+      {type:'rapid',color:'hsl(330,80%,60%)',label:'R'},
+      {type:'spread',color:'hsl(100,70%,55%)',label:'S'},
+      {type:'shield',color:'hsl(220,80%,60%)',label:'D'},
+      {type:'life',color:'hsl(15,90%,65%)',label:'+'}
     ];
     function maybeSpawnPowerup(x,y){
       if(Math.random()<0.12){
@@ -361,7 +361,10 @@ document.addEventListener('DOMContentLoaded',function(){
       }
       // power-up indicator
       if(player.powerType){
-        var pcol=player.powerType==='rapid'?'hsl(180,80%,55%)':'hsl(40,80%,55%)';
+        var pcol=player.powerType==='rapid'?'hsl(330,80%,60%)':
+          player.powerType==='spread'?'hsl(100,70%,55%)':
+          player.powerType==='shield'?'hsl(220,80%,60%)':
+          'hsl(15,90%,65%)';
         ctx.fillStyle=pcol;
         ctx.fillRect(px+pw/2-3,py-18,6,4);
       }
@@ -445,13 +448,38 @@ document.addEventListener('DOMContentLoaded',function(){
       powerups.forEach(function(p){
         p.phase+=0.1;
         var bob=Math.sin(p.phase)*2;
+        var cx=p.x+p.w/2, cy=p.y+p.h/2+bob;
         ctx.fillStyle=p.color;
         ctx.globalAlpha=0.9;
-        ctx.fillRect(p.x,p.y+bob,p.w,p.h);
+        if(p.type==='rapid'){
+          // diamond shape
+          ctx.beginPath();
+          ctx.moveTo(cx,p.y+bob);
+          ctx.lineTo(p.x+p.w,cy);
+          ctx.lineTo(cx,p.y+p.h+bob);
+          ctx.lineTo(p.x,cy);
+          ctx.closePath(); ctx.fill();
+        } else if(p.type==='spread'){
+          // triangle pointing down
+          ctx.beginPath();
+          ctx.moveTo(cx,p.y+bob);
+          ctx.lineTo(p.x,p.y+p.h+bob);
+          ctx.lineTo(p.x+p.w,p.y+p.h+bob);
+          ctx.closePath(); ctx.fill();
+        } else if(p.type==='shield'){
+          // circle
+          ctx.beginPath();
+          ctx.arc(cx,cy,p.w/2,0,Math.PI*2);
+          ctx.fill();
+        } else if(p.type==='life'){
+          // plus sign
+          ctx.fillRect(p.x+5,p.y+bob+2,p.w-10,12);
+          ctx.fillRect(p.x+2,p.y+bob+5,12,p.h-10);
+        }
         ctx.fillStyle='#000';
         ctx.font='bold 11px Inter, system-ui, sans-serif';
         ctx.textAlign='center';
-        ctx.fillText(p.label,p.x+p.w/2,p.y+bob+p.h-4);
+        ctx.fillText(p.label,cx,p.y+bob+p.h-5);
         ctx.textAlign='left';
         ctx.globalAlpha=1;
       });
