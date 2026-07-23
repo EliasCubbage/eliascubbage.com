@@ -38,12 +38,15 @@ document.addEventListener('DOMContentLoaded',function(){
 
   if(canvas && scoreLabel && livesLabel && statusLabel && startBtn && resetBtn){
     var ctx=canvas.getContext('2d');
+    // Make canvas bigger
+    canvas.width=540;
+    canvas.height=750;
     var W=canvas.width;
     var H=canvas.height;
 
     // game state
     var keys={left:false,right:false,shoot:false};
-    var player={x:W/2-18,y:H-48,w:36,h:16,speed:5,invuln:0,powerType:null,powerTimer:0};
+    var player={x:W/2-18,y:H-48,w:36,h:16,speed:5,invuln:0,powerType:null,powerTimer:0,powerType2:null,powerTimer2:0};
     var bullets=[];
     var enemies=[];
     var enemyBullets=[];
@@ -57,7 +60,7 @@ document.addEventListener('DOMContentLoaded',function(){
       stars.push({x:Math.random()*W,y:Math.random()*H,r:Math.random()*1.5+0.5,s:Math.random()*0.6+0.1,tw:Math.random()*Math.PI*2});
     }
 
-    var frame=0,level=1,score=0,lives=3,gameOver=true,gameStarted=false,gamePaused=false,shootCooldown=0,shake=0,combo=0,comboTimer=0;
+    var frame=0,level=1,score=0,lives=3,gameOver=true,gameStarted=false,gamePaused=false,shootCooldown=0,shake=0,combo=0,comboTimer=0,playerExploding=false,playerExplodeTimer=0;
     // formation and dive state (Galaga-style lockstep)
     var formationX=0, formationY=0, diveCountdown=0;
 
@@ -195,6 +198,9 @@ document.addEventListener('DOMContentLoaded',function(){
       enemies=[];
       var rows=2+Math.min(level,4);
       var cols=6;
+      // More enemies per wave at higher levels
+      if(level>3) cols=7;
+      if(level>6) cols=8;
       for(var row=0;row<rows;row++){
         for(var col=0;col<cols;col++){
           var typeIdx=(row+col)%enemyTypes.length;
@@ -265,8 +271,34 @@ document.addEventListener('DOMContentLoaded',function(){
     }
     function applyPowerup(p){
       sfxPowerup();
-      if(p.type==='rapid'){ player.powerType='rapid'; player.powerTimer=600; spawnFloatText(player.x+player.w/2,player.y,'RAPID FIRE',p.color); }
-      else if(p.type==='spread'){ player.powerType='spread'; player.powerTimer=600; spawnFloatText(player.x+player.w/2,player.y,'SPREAD SHOT',p.color); }
+      if(p.type==='rapid'){
+        if(player.powerType==='spread'||player.powerType2==='spread'){
+          // Stack: both rapid and spread active
+          player.powerType='rapid';
+          player.powerType2='spread';
+          player.powerTimer=600;
+          player.powerTimer2=600;
+          spawnFloatText(player.x+player.w/2,player.y,'RAPID+SPREAD',p.color);
+        } else {
+          player.powerType='rapid';
+          player.powerTimer=600;
+          spawnFloatText(player.x+player.w/2,player.y,'RAPID FIRE',p.color);
+        }
+      }
+      else if(p.type==='spread'){
+        if(player.powerType==='rapid'||player.powerType2==='rapid'){
+          // Stack: both rapid and spread active
+          player.powerType='rapid';
+          player.powerType2='spread';
+          player.powerTimer=600;
+          player.powerTimer2=600;
+          spawnFloatText(player.x+player.w/2,player.y,'RAPID+SPREAD',p.color);
+        } else {
+          player.powerType='spread';
+          player.powerTimer=600;
+          spawnFloatText(player.x+player.w/2,player.y,'SPREAD SHOT',p.color);
+        }
+      }
       else if(p.type==='shield'){ player.invuln=180; spawnFloatText(player.x+player.w/2,player.y,'SHIELD',p.color); }
       else if(p.type==='life'){ lives=Math.min(lives+1,5); setLabels(); spawnFloatText(player.x+player.w/2,player.y,'+1 LIFE',p.color); }
     }
@@ -274,10 +306,10 @@ document.addEventListener('DOMContentLoaded',function(){
     // ===== GAME FLOW =====
     function startGame(){
       initAudio();
-      player.x=W/2-18; player.invuln=0; player.powerType=null; player.powerTimer=0;
+      player.x=W/2-18; player.invuln=0; player.powerType=null; player.powerTimer=0; player.powerType2=null; player.powerTimer2=0;
       bullets=[]; enemyBullets=[]; particles=[]; powerups=[]; floatTexts=[];
       frame=0; level=1; score=0; lives=3; combo=0; comboTimer=0;
-      gameOver=false; gameStarted=true; gamePaused=false; shootCooldown=0; shake=0;
+      gameOver=false; gameStarted=true; gamePaused=false; shootCooldown=0; shake=0; playerExploding=false; playerExplodeTimer=0;
       spawnWave(); setLabels(); setStatus('Use arrows and Space to shoot.');
       hideOverlay();
       if(pauseBtn){ pauseBtn.disabled=false; pauseBtn.textContent='Pause'; }
@@ -296,10 +328,20 @@ document.addEventListener('DOMContentLoaded',function(){
     function handleGameOver(){
       gameOver=true; gameStarted=false;
       sfxGameOver();
+      // Big player explosion
+      playerExploding=true;
+      playerExplodeTimer=0;
+      spawnExplosion(player.x+player.w/2,player.y+player.h/2,'#ff4d2a',30);
+      spawnExplosion(player.x+player.w/2,player.y+player.h/2,'#ff9933',20);
+      spawnExplosion(player.x+player.w/2,player.y+player.h/2,'#ffcc00',15);
+      spawnExplosion(player.x+player.w/2,player.y+player.h/2,'#ffffff',10);
+      shake=20;
       setStatus('Game over - score: '+score);
       if(pauseBtn){ pauseBtn.disabled=true; }
-      showOverlay('GAME OVER','Final Score: '+score,'Play Again');
-      if(checkHighScore(score)>=0) setTimeout(function(){ promptInitials(); },600);
+      setTimeout(function(){
+        showOverlay('GAME OVER','Final Score: '+score,'Play Again');
+        if(checkHighScore(score)>=0) setTimeout(function(){ promptInitials(); },600);
+      },1000);
     }
 
     // ===== PROFANITY FILTER =====
@@ -346,6 +388,8 @@ document.addEventListener('DOMContentLoaded',function(){
 
     function drawPlayer(){
       var px=player.x,py=player.y,pw=player.w,ph=player.h;
+      // Don't draw player if exploding
+      if(playerExploding) return;
       // shield aura
       if(player.invuln>0){
         ctx.fillStyle='rgba(138,226,255,'+(0.15+Math.sin(frame*0.3)*0.1)+')';
@@ -359,14 +403,22 @@ document.addEventListener('DOMContentLoaded',function(){
         ctx.fillStyle='rgba(255,180,50,'+(0.4+Math.sin(frame*0.2)*0.2)+')';
         ctx.fillRect(px+8,py+ph-2,pw-16,5);
       }
-      // power-up indicator
-      if(player.powerType){
-        var pcol=player.powerType==='rapid'?'hsl(330,80%,60%)':
+      // power-up indicator - show both if stacked
+      if(player.powerType||player.powerType2){
+        var pcol1=player.powerType==='rapid'?'hsl(330,80%,60%)':
           player.powerType==='spread'?'hsl(100,70%,55%)':
-          player.powerType==='shield'?'hsl(220,80%,60%)':
           'hsl(15,90%,65%)';
-        ctx.fillStyle=pcol;
-        ctx.fillRect(px+pw/2-3,py-18,6,4);
+        var pcol2=player.powerType2==='rapid'?'hsl(330,80%,60%)':
+          player.powerType2==='spread'?'hsl(100,70%,55%)':
+          'hsl(15,90%,65%)';
+        if(player.powerType){
+          ctx.fillStyle=pcol1;
+          ctx.fillRect(px+pw/2-3,py-18,6,4);
+        }
+        if(player.powerType2){
+          ctx.fillStyle=pcol2;
+          ctx.fillRect(px+pw/2-3,py-22,6,4);
+        }
       }
     }
 
@@ -502,25 +554,29 @@ document.addEventListener('DOMContentLoaded',function(){
         }
       });
 
-      // Trigger dive attack if countdown expires
+      // Trigger dive attack if countdown expires - more frequent, in squads
       if(diveCountdown<=0 && diveCandidates.length>0){
-        var diveCount=Math.min(1+Math.floor(Math.random()*2), diveCandidates.length);
+        var diveCount=Math.min(2+Math.floor(Math.random()*3), diveCandidates.length);
         var shuffled=diveCandidates.slice();
+        // Sort by column to make squads dive together
+        shuffled.sort(function(a,b){ return a.gridX-b.gridX; });
         for(var di=0;di<diveCount;di++){
-          var idx=Math.floor(Math.random()*shuffled.length);
-          var diver=shuffled[idx];
+          var diver=shuffled[di];
+          if(!diver) break;
           diver.diving=true;
-          diver.diveTargetX=player.x+player.w/2;
-          diver.diveTargetY=player.y+player.h/2+30;
-          diver.diveSpeed=2+Math.random()*1.5;
-          shuffled.splice(idx,1);
+          // Squad target - spread across player area
+          diver.diveTargetX=player.x+player.w/2+(Math.random()-0.5)*80;
+          diver.diveTargetY=player.y+player.h/2+30+(Math.random()-0.5)*40;
+          diver.diveSpeed=2.5+Math.random()*1.5;
         }
-        // Longer delay between dive waves (fewer bullets overall)
-        diveCountdown=240+Math.floor(Math.random()*120);
+        // Shorter delay between dive waves (come down twice as much)
+        diveCountdown=120+Math.floor(Math.random()*60);
       }
 
-      // Track how many enemies shoot this frame (cap at 1-2)
+      // Track how many enemies shoot this frame (cap increased by 50%)
       var shooterCount=0;
+      var maxShooters=Math.floor(1.5*(1+Math.floor(level/3)));
+      if(maxShooters>5) maxShooters=5;
 
       enemies.forEach(function(e){
         if(!e.alive) return;
@@ -531,8 +587,8 @@ document.addEventListener('DOMContentLoaded',function(){
             var t=frame*0.02+(e.phase||0);
             e.x=(e.baseX||W/2-40)+Math.sin(t*0.5)*80;
             e.y=(e.baseY||30)+Math.sin(t)*15;
-            // boss shoots rarely (much lower rate)
-            if(shooterCount<2 && Math.random()<0.008 && frame%90<15){
+            // boss shoots more
+            if(shooterCount<maxShooters && Math.random()<0.015 && frame%60<15){
               enemyBullets.push({x:e.x+e.w/2-2,y:e.y+e.h,w:4,h:8,speed:2+level*0.2,vx:0});
               enemyBullets.push({x:e.x+e.w/2-2,y:e.y+e.h,w:4,h:8,speed:2+level*0.2,vx:-1});
               enemyBullets.push({x:e.x+e.w/2-2,y:e.y+e.h,w:4,h:8,speed:2+level*0.2,vx:1});
@@ -562,8 +618,8 @@ document.addEventListener('DOMContentLoaded',function(){
           if(dist>5){
             e.x+=dx/dist*e.diveSpeed;
             e.y+=dy/dist*e.diveSpeed;
-            // Diving enemies can shoot occasionally
-            if(shooterCount<2 && Math.random()<0.012){
+            // Diving enemies shoot more
+            if(shooterCount<maxShooters && Math.random()<0.02){
               enemyBullets.push({x:e.x+e.w/2-2,y:e.y+e.h,w:4,h:8,speed:2+level*0.2,vx:0});
               shooterCount++;
             }
@@ -602,8 +658,8 @@ document.addEventListener('DOMContentLoaded',function(){
         e.x=e.gridX+formationX;
         e.y=e.gridY+formationY;
 
-        // Very limited shooting from formation
-        if(shooterCount<1 && Math.random()<0.0015 && frame%240<20){
+        // More shooting from formation (50% more)
+        if(shooterCount<maxShooters && Math.random()<0.003 && frame%180<20){
           enemyBullets.push({x:e.x+e.w/2-2,y:e.y+e.h,w:4,h:8,speed:2+level*0.2,vx:0});
           shooterCount++;
         }
@@ -660,6 +716,29 @@ document.addEventListener('DOMContentLoaded',function(){
       enemyBullets=enemyBullets.filter(function(b){ return !b.hit; });
     }
 
+    // ===== ENEMY CONTACT DAMAGE =====
+    function checkEnemyContact(){
+      if(player.invuln>0||playerExploding) return;
+      enemies.forEach(function(e){
+        if(!e.alive) return;
+        if(e.x<player.x+player.w&&e.x+e.w>player.x&&e.y<player.y+player.h&&e.y+e.h>player.y){
+          // Contact damage!
+          lives-=1; setLabels(); shake=12; sfxPlayerHit();
+          spawnExplosion(player.x+player.w/2,player.y+player.h/2,'#ff4d2a',14);
+          spawnExplosion(player.x+player.w/2,player.y+player.h/2,'#ff9933',10);
+          spawnExplosion(player.x+player.w/2,player.y+player.h/2,'#ffcc00',8);
+          spawnExplosion(player.x+player.w/2,player.y+player.h/2,'#ffffff',6);
+          // Destroy the enemy on contact too
+          e.alive=false;
+          spawnExplosion(e.x+e.w/2,e.y+e.h/2,e.bodyColor,12);
+          player.invuln=120;
+          combo=0;
+          if(lives<=0){ handleGameOver(); }
+          else { setStatus('Collision! Lives left: '+lives); }
+        }
+      });
+    }
+
     function updatePowerups(){
       powerups=powerups.filter(function(p){ return p.y<H+10; });
       powerups.forEach(function(p){
@@ -687,12 +766,20 @@ document.addEventListener('DOMContentLoaded',function(){
 
     function fireBullet(){
       if(shootCooldown>0) return;
-      if(player.powerType==='spread'){
+      var isRapid=(player.powerType==='rapid'||player.powerType2==='rapid');
+      var isSpread=(player.powerType==='spread'||player.powerType2==='spread');
+      if(isRapid && isSpread){
+        // Stacked: rapid fire spread shot
+        bullets.push({x:player.x+player.w/2-2,y:player.y-14,w:4,h:10,speed:8,vx:-1.5});
+        bullets.push({x:player.x+player.w/2-2,y:player.y-14,w:4,h:10,speed:8,vx:0});
+        bullets.push({x:player.x+player.w/2-2,y:player.y-14,w:4,h:10,speed:8,vx:1.5});
+        shootCooldown=5;
+      } else if(isSpread){
         bullets.push({x:player.x+player.w/2-2,y:player.y-14,w:4,h:10,speed:7,vx:-1.5});
         bullets.push({x:player.x+player.w/2-2,y:player.y-14,w:4,h:10,speed:7,vx:0});
         bullets.push({x:player.x+player.w/2-2,y:player.y-14,w:4,h:10,speed:7,vx:1.5});
         shootCooldown=12;
-      } else if(player.powerType==='rapid'){
+      } else if(isRapid){
         bullets.push({x:player.x+player.w/2-2,y:player.y-14,w:4,h:10,speed:8});
         shootCooldown=5;
       } else {
@@ -712,16 +799,32 @@ document.addEventListener('DOMContentLoaded',function(){
         player.powerTimer-=1;
         if(player.powerTimer<=0) player.powerType=null;
       }
+      if(player.powerTimer2>0){
+        player.powerTimer2-=1;
+        if(player.powerTimer2<=0) player.powerType2=null;
+      }
       // apply bullet vx
       bullets.forEach(function(b){ if(b.vx) b.x+=b.vx; });
       bullets=bullets.filter(function(b){ return b.x>-10 && b.x<W+10; });
     }
 
     function updateFrame(){
-      if(!gameStarted||gameOver||gamePaused) return;
+      if(!gameStarted||gameOver||gamePaused){
+        // Still update explosion animation during game over
+        if(playerExploding){
+          playerExplodeTimer+=1;
+          if(playerExplodeTimer>30) playerExploding=false;
+        }
+        updateParticles();
+        updateFloatTexts();
+        if(shake>0) shake-=1;
+        frame+=1;
+        return;
+      }
       updatePlayer();
       updateBullets();
       updateEnemyBullets();
+      checkEnemyContact();
       updateEnemies();
       updatePowerups();
       updateParticles();
