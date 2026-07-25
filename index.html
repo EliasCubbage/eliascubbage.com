@@ -118,7 +118,7 @@
     </section>
     <section id="contact" class="section container reveal">
       <h2>Contact</h2>
-      <p>If you'd like to work together, email me at <a href="mailto:elias.cubbage@gmail.com">elias.cubbage@gmail.com</a>.</p>
+      <p>If you'd like to work together, email me at <span id="email-reveal"></span>.</p>
     </section>
     <section id="game" class="section container reveal">
       <h2>CUBBLITZ</h2>
@@ -176,5 +176,15 @@
   </footer>
   <script src="config.js"></script>
   <script src="app-cubblitz.js"></script>
+  <script>
+    (function() {
+      var a = [101,108,105,97,115,46,99,117,98,98,97,103,101,64,103,109,97,105,108,46,99,111,109];
+      var e = document.getElementById('email-reveal');
+      if (e) {
+        var m = String.fromCharCode.apply(null, a);
+        e.innerHTML = '<a href="mailto:' + m + '">' + m + '</a>';
+      }
+    })();
+  </script>
 </body>
 </html>
