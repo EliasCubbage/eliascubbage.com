@@ -183,10 +183,11 @@ body{
 @media (max-width:440px){.stats-band{grid-template-columns:1fr}}
 
 /* ===== About ===== */
-#about{min-height:100vh;display:flex;flex-direction:column;justify-content:center}
-.about-grid{display:grid;grid-template-columns:1.2fr 1fr;gap:40px;align-items:start}
+#about{min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding-left:48px;padding-right:48px;max-width:none;margin:0}
+#about .section-title{max-width:1080px;margin-left:auto;margin-right:auto;width:100%}
+.about-grid{display:grid;grid-template-columns:1fr;gap:40px;align-items:start;max-width:1080px;margin-left:auto;margin-right:auto;width:100%}
 @media (max-width:860px){.about-grid{grid-template-columns:1fr;gap:28px}}
-.about-lead{color:var(--muted);font-size:1.05rem;max-width:720px;margin:0 0 24px}
+.about-lead{color:var(--muted);font-size:1.2rem;margin:0 0 24px;line-height:1.7;max-width:none}
 .skills{display:flex;gap:10px;flex-wrap:wrap;list-style:none;padding:0;margin:0}
 .skills li{
   display:inline-flex;align-items:center;gap:8px;
