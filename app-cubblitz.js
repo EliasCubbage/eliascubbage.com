@@ -51,7 +51,7 @@ document.addEventListener('DOMContentLoaded',function(){
   // ===== TYPEWRITER EFFECT =====
   var typedEl=document.getElementById('typed');
   if(typedEl){
-    var roles=['Data Scientist · Automation Engineer · Tax Accountant','ML Systems Builder','LLM & NLP Specialist','Automation & Workflow Engineer','Data-Driven Problem Solver'];
+    var roles=['Business Development · Sales Professional','B2B Technology Sales','MEDDIC & SPIN Selling','Enterprise Account Executive','Pipeline Builder & Team Leader'];
     var roleIdx=0,charIdx=0,deleting=false,typeTimer=null;
     function typeLoop(){
       var current=roles[roleIdx];

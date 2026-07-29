@@ -303,6 +303,9 @@ body{
 .contact-email{margin:0 0 24px;font-size:1.4rem;font-weight:700}
 .contact-email a{color:var(--accent);text-decoration:none;transition:color 0.25s var(--ease)}
 .contact-email a:hover{color:var(--accent-2)}
+.contact-phone{margin:0 0 24px;font-size:1.1rem;font-weight:600}
+.contact-phone a{color:var(--text);text-decoration:none;transition:color 0.25s var(--ease)}
+.contact-phone a:hover{color:var(--accent)}
 .contact-card .cta-row{justify-content:center;margin:0}
 
 /* ===== Footer ===== */
