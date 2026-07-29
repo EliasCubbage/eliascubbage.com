@@ -102,30 +102,6 @@ document.addEventListener('DOMContentLoaded',function(){
   }
 
 
-  // ===== PROJECT FILTER =====
-  var filterBtns=Array.prototype.slice.call(document.querySelectorAll('.filter-btn'));
-  var projectCards=Array.prototype.slice.call(document.querySelectorAll('.projects-grid .card'));
-  filterBtns.forEach(function(btn){
-    btn.addEventListener('click',function(){
-      filterBtns.forEach(function(b){ b.classList.remove('active'); });
-      btn.classList.add('active');
-      var filter=btn.getAttribute('data-filter');
-      projectCards.forEach(function(card){
-        var cat=card.getAttribute('data-cat');
-        var show=(filter==='all'||cat===filter);
-        if(show){
-          card.classList.remove('hidden');
-          // re-trigger fade-in
-          card.classList.add('fade-out');
-          requestAnimationFrame(function(){ requestAnimationFrame(function(){ card.classList.remove('fade-out'); }); });
-        } else {
-          card.classList.add('fade-out');
-          setTimeout(function(){ card.classList.add('hidden'); },250);
-        }
-      });
-    });
-  });
-
   // ===== CARD TILT =====
   var tiltCards=Array.prototype.slice.call(document.querySelectorAll('.tilt'));
   var isTouch=window.matchMedia('(hover:none)').matches;
