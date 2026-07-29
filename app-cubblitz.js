@@ -101,22 +101,6 @@ document.addEventListener('DOMContentLoaded',function(){
     counters.forEach(function(c){ animateCounter(c); });
   }
 
-  // ===== SKILL BAR ANIMATION =====
-  var skillFills=Array.prototype.slice.call(document.querySelectorAll('.sb-fill'));
-  if('IntersectionObserver' in window && skillFills.length){
-    var skillObserver=new IntersectionObserver(function(entries){
-      entries.forEach(function(entry){
-        if(entry.isIntersecting){
-          var lvl=entry.target.getAttribute('data-level')||0;
-          entry.target.style.width=lvl+'%';
-          skillObserver.unobserve(entry.target);
-        }
-      });
-    },{ threshold:0.3 });
-    skillFills.forEach(function(f){ skillObserver.observe(f); });
-  } else {
-    skillFills.forEach(function(f){ f.style.width=(f.getAttribute('data-level')||0)+'%'; });
-  }
 
   // ===== PROJECT FILTER =====
   var filterBtns=Array.prototype.slice.call(document.querySelectorAll('.filter-btn'));

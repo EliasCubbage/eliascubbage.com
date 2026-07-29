@@ -1,7 +1,7 @@
 /* ============================================================
    Elias Cubbage — Portfolio
    Bright, professional light theme with teal→blue accent
-   Enhanced: scroll progress, stats, skill bars, filters, marquee
+   Enhanced: scroll progress, stats, filters, marquee
    ============================================================ */
 
 :root{
@@ -198,16 +198,6 @@ body{
 .skills li:hover{border-color:rgba(13,148,136,0.35);transform:translateY(-2px);box-shadow:0 6px 16px -4px rgba(13,148,136,0.2)}
 .skill-dot{width:7px;height:7px;border-radius:50%;background:var(--accent-grad);box-shadow:0 0 8px rgba(13,148,136,0.4)}
 
-/* skill bars */
-.skill-bars{padding:24px;border-radius:var(--radius);background:linear-gradient(180deg,var(--card),var(--card-2));border:1px solid var(--border);box-shadow:var(--shadow)}
-.skill-bars-title{margin:0 0 18px;font-size:1rem;font-weight:700;letter-spacing:-0.01em}
-.skill-bar{display:grid;grid-template-columns:120px 1fr 34px;align-items:center;gap:12px;margin-bottom:14px}
-.skill-bar:last-child{margin-bottom:0}
-.sb-label{font-size:0.84rem;color:var(--muted);font-weight:500}
-.sb-track{height:8px;border-radius:999px;background:rgba(15,23,42,0.06);overflow:hidden}
-.sb-fill{height:100%;width:0;border-radius:999px;background:var(--accent-grad);transition:width 1.2s var(--ease);box-shadow:0 0 12px rgba(13,148,136,0.3)}
-.sb-pct{font-size:0.82rem;font-weight:700;color:var(--text);font-variant-numeric:tabular-nums;text-align:right}
-@media (max-width:440px){.skill-bar{grid-template-columns:1fr 30px;grid-template-areas:"label label" "track pct"}.sb-label{grid-area:label}.sb-track{grid-area:track}.sb-pct{grid-area:pct;text-align:right}}
 
 /* ===== Projects ===== */
 .filter-bar{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 24px}
