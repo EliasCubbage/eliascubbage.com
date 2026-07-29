@@ -61,8 +61,8 @@ body{
 
 /* ===== Layout ===== */
 .container{max-width:1080px;margin:0 auto;padding:0 32px}
-.section{padding:72px 0}
-@media (max-width:600px){.section{padding:56px 0}.container{padding:0 20px}}
+.section{padding:40px 0}
+@media (max-width:600px){.section{padding:32px 0}.container{padding:0 20px}}
 
 /* ===== Header ===== */
 .site-header{
@@ -183,6 +183,7 @@ body{
 @media (max-width:440px){.stats-band{grid-template-columns:1fr}}
 
 /* ===== About ===== */
+#about{min-height:100vh;display:flex;flex-direction:column;justify-content:center}
 .about-grid{display:grid;grid-template-columns:1.2fr 1fr;gap:40px;align-items:start}
 @media (max-width:860px){.about-grid{grid-template-columns:1fr;gap:28px}}
 .about-lead{color:var(--muted);font-size:1.05rem;max-width:720px;margin:0 0 24px}
