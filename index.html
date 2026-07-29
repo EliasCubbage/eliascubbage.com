@@ -15,13 +15,21 @@
   <meta property="og:locale" content="en_US" />
   <meta name="twitter:card" content="summary" />
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%232f2f2f'/%3E%3Ctext x='16' y='22' text-anchor='middle' font-family='Inter,system-ui,sans-serif' font-size='16' font-weight='700' fill='%23e6eef6'%3EEC%3C/text%3E%3C/svg%3E" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles-cubblitz.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles-cubblitz.css?v=2">
 </head>
 <body>
+  <div class="bg-decor" aria-hidden="true">
+    <div class="bg-glow glow-a"></div>
+    <div class="bg-glow glow-b"></div>
+    <div class="bg-grid"></div>
+  </div>
   <header class="site-header">
     <div class="container header-inner">
-      <a class="brand" href="/">Home</a>
+      <a class="brand" href="/">
+        <span class="brand-mark">EC</span>
+        <span class="brand-name">Elias Cubbage</span>
+      </a>
       <button id="nav-toggle" class="nav-toggle" aria-label="Toggle navigation">☰</button>
       <nav id="nav" class="nav">
         <a href="#about">About</a>
@@ -35,8 +43,9 @@
     <section class="hero">
       <div class="container hero-inner">
         <div class="hero-content">
+          <p class="eyebrow">Data Scientist · Automation Engineer · Tax Accountant</p>
           <h1>Elias Cubbage</h1>
-          <p class="lead">Data scientist and tax accountant. I build ML systems and automation tools to solve real problems, from fair housing compliance to financial workflows.</p>
+          <p class="lead">I build ML systems and automation tools to solve real problems — from fair housing compliance to financial workflows.</p>
           <p class="cta-row">
             <a class="btn primary" href="#projects">See work</a>
             <a class="btn ghost" href="#contact">Get in touch</a>
@@ -47,78 +56,98 @@
           </p>
         </div>
         <div class="hero-visual" aria-hidden="true">
-          <svg width="220" height="220" viewBox="0 0 220 220" xmlns="http://www.w3.org/2000/svg">
-            <rect width="220" height="220" rx="28" fill="#2f2f2f" />
-            <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="Inter, system-ui, -apple-system, 'Segoe UI', Roboto" font-size="56" fill="#e6eef6">EC</text>
-          </svg>
+          <div class="monogram-ring">
+            <svg width="220" height="220" viewBox="0 0 220 220" xmlns="http://www.w3.org/2000/svg">
+              <rect width="220" height="220" rx="28" fill="#14161c" />
+              <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="Inter, system-ui, -apple-system, 'Segoe UI', Roboto" font-size="56" font-weight="800" fill="#e6eef6">EC</text>
+            </svg>
+          </div>
         </div>
       </div>
     </section>
     <section id="about" class="section container reveal">
-      <h2>About</h2>
-      <p>I combine data science, machine learning, and financial expertise to build systems that scale. Experience building LLM-powered compliance tools and automation workflows for complex business problems. Currently working in tax accounting while developing automation and analytical solutions.</p>
+      <h2 class="section-title">About</h2>
+      <p class="about-lead">I combine data science, machine learning, and financial expertise to build systems that scale. Experience building LLM-powered compliance tools and automation workflows for complex business problems. Currently working in tax accounting while developing automation and analytical solutions.</p>
       <ul class="skills">
-        <li>Python & ML</li>
-        <li>LLMs & NLP</li>
-        <li>Data Science</li>
-        <li>Automation & Scripting</li>
-        <li>Financial Analysis</li>
-        <li>Tax Accounting</li>
+        <li><span class="skill-dot"></span>Python & ML</li>
+        <li><span class="skill-dot"></span>LLMs & NLP</li>
+        <li><span class="skill-dot"></span>Data Science</li>
+        <li><span class="skill-dot"></span>Automation & Scripting</li>
+        <li><span class="skill-dot"></span>Financial Analysis</li>
+        <li><span class="skill-dot"></span>Tax Accounting</li>
       </ul>
     </section>
     <section id="projects" class="section container reveal">
-      <h2>Selected Projects</h2>
+      <h2 class="section-title">Selected Projects</h2>
       <div class="projects-grid">
         <article class="card">
+          <div class="card-glow"></div>
           <h3>Fair Housing Compliance LLM</h3>
           <p>Built and trained an LLM system to detect fair housing violations in real estate listings. Achieved high precision classification on complex legal language patterns and bias detection.</p>
+          <p class="card-tags"><span class="tag">LLM</span><span class="tag">NLP</span><span class="tag">Compliance</span></p>
           <p class="card-actions"><a class="btn" href="https://github.com/EliasCubbage" target="_blank" rel="noopener">View on GitHub</a></p>
         </article>
         <article class="card">
+          <div class="card-glow"></div>
           <h3>Tax Automation & Analysis</h3>
           <p>Designed workflows and analytical tools to streamline tax accounting processes. Focus on accuracy, compliance, and scalable solutions for complex tax scenarios.</p>
+          <p class="card-tags"><span class="tag">Automation</span><span class="tag">Finance</span><span class="tag">Analytics</span></p>
           <p class="card-actions"><a class="btn" href="#">Details</a></p>
         </article>
         <article class="card">
+          <div class="card-glow"></div>
           <h3>Data Science & ML Systems</h3>
           <p>Experience with machine learning pipeline development, model training, and deployment. Specialized in NLP and predictive analytics for business applications.</p>
+          <p class="card-tags"><span class="tag">ML Pipelines</span><span class="tag">Deployment</span><span class="tag">Predictive</span></p>
           <p class="card-actions"><a class="btn" href="https://github.com/EliasCubbage" target="_blank" rel="noopener">Explore</a></p>
         </article>
       </div>
     </section>
     <section id="professional" class="section container reveal">
-      <h2>Professional Background</h2>
+      <h2 class="section-title">Professional Background</h2>
       <div class="cv-panel">
         <div class="cv-item">
+          <div class="cv-marker"></div>
           <h4>Automation Engineer</h4>
-          <p><em>David L. Mortimer CPA PC · Jan 2026 - Present</em></p>
+          <p class="cv-meta"><em>David L. Mortimer CPA PC · Jan 2026 - Present</em></p>
           <p>Focused on workflow automation, process engineering, and operational improvements.</p>
         </div>
         <div class="cv-item">
+          <div class="cv-marker"></div>
           <h4>Data Scientist</h4>
-          <p><em>Accenture · Jul 2024 - Jun 2026</em></p>
+          <p class="cv-meta"><em>Accenture · Jul 2024 - Jun 2026</em></p>
           <p>Fine-tuned LLMs to prioritize candidates based on interview responses, reducing labor hours for clients. Used PySpark to analyze turnover and recommend actions that reduced churn by 5.8%. Trained and deployed models for candidate recommendation, contributing to a measurable sales increase.</p>
         </div>
         <div class="cv-item">
+          <div class="cv-marker"></div>
           <h4>Data Analyst</h4>
-          <p><em>Accenture · Jan 2024 - Jul 2024</em></p>
+          <p class="cv-meta"><em>Accenture · Jan 2024 - Jul 2024</em></p>
           <p>Built internal Python tools for validation studies, reduced turnaround time by 60%, and developed data pipelines to populate dashboards and SQL/Azure-based data stores.</p>
         </div>
         <div class="cv-item">
+          <div class="cv-marker"></div>
           <h4>Patent Database Intern</h4>
-          <p><em>Novotech · Jun 2023 - Dec 2023</em></p>
+          <p class="cv-meta"><em>Novotech · Jun 2023 - Dec 2023</em></p>
           <p>Applied quantitative analysis to improve internal operations, managed inventory tracking in Excel and SQL, and supported accounting spreadsheets and financial reporting.</p>
         </div>
         <div class="cv-item">
+          <div class="cv-marker"></div>
           <h4>Undergraduate Research Assistant</h4>
-          <p><em>Old Dominion University · Jan 2023 - Jun 2023</em></p>
+          <p class="cv-meta"><em>Old Dominion University · Jan 2023 - Jun 2023</em></p>
           <p>Created a remotely accessible SQL database, used R for data cleaning and regression analysis, and built Python scripts to collect data from municipal and private APIs.</p>
         </div>
       </div>
     </section>
     <section id="contact" class="section container reveal">
-      <h2>Contact</h2>
-      <p>If you'd like to work together, email me at <span id="email-reveal"></span>.</p>
+      <h2 class="section-title">Contact</h2>
+      <div class="contact-card">
+        <p class="contact-lead">If you'd like to work together, email me at</p>
+        <p class="contact-email"><span id="email-reveal"></span></p>
+        <p class="cta-row">
+          <a class="chip" href="https://github.com/EliasCubbage" target="_blank" rel="noopener">GitHub</a>
+          <a class="chip" href="https://www.linkedin.com/in/elias-cubbage/" target="_blank" rel="noopener">LinkedIn</a>
+        </p>
+      </div>
     </section>
     <section id="game" class="section container reveal">
       <h2>CUBBLITZ</h2>
@@ -172,7 +201,13 @@
     </section>
   </main>
   <footer class="site-footer">
-    <div class="container">© <span id="year"></span> Elias Cubbage</div>
+    <div class="container footer-inner">
+      <p class="footer-copy">© <span id="year"></span> Elias Cubbage</p>
+      <p class="footer-links">
+        <a class="chip" href="https://github.com/EliasCubbage" target="_blank" rel="noopener">GitHub</a>
+        <a class="chip" href="https://www.linkedin.com/in/elias-cubbage/" target="_blank" rel="noopener">LinkedIn</a>
+      </p>
+    </div>
   </footer>
   <script src="config.js"></script>
   <script src="app-cubblitz.js"></script>
