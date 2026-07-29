@@ -110,12 +110,6 @@ body{
 .cta-row{display:flex;gap:12px;flex-wrap:wrap;margin:0 0 22px}
 .links-row{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 24px}
 
-/* hero stats */
-.hero-stats{display:flex;gap:28px;flex-wrap:wrap;padding-top:20px;border-top:1px solid var(--border)}
-.hero-stat{display:flex;flex-direction:column;gap:2px}
-.hero-stat-num{font-size:1.5rem;font-weight:800;letter-spacing:-0.02em;background:var(--accent-grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;font-variant-numeric:tabular-nums}
-.hero-stat-label{font-size:0.78rem;color:var(--muted-2);text-transform:uppercase;letter-spacing:0.06em}
-
 /* ===== Buttons & chips ===== */
 .btn{
   display:inline-flex;align-items:center;justify-content:center;
@@ -370,7 +364,6 @@ body{
   .hero-content{display:flex;flex-direction:column;align-items:center}
   .lead{margin-left:auto;margin-right:auto}
   .cta-row,.links-row{justify-content:center}
-  .hero-stats{justify-content:center}
 }
 @media (max-width:680px){
   .nav{display:none;flex-direction:column;gap:4px;position:absolute;top:64px;left:0;right:0;background:rgba(248,250,252,0.96);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);padding:12px 20px}
