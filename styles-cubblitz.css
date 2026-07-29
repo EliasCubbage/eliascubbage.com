@@ -178,6 +178,30 @@ body{
 }
 .section-title::before{content:"";width:28px;height:2px;border-radius:2px;background:var(--accent-grad);flex:0 0 28px}
 
+/* ===== Value Proposition Banner ===== */
+.value-banner{padding:48px 0 24px}
+.value-banner-inner{background:linear-gradient(180deg,var(--card),var(--card-2));border:1px solid var(--border);border-radius:var(--radius-lg);padding:40px 36px;box-shadow:var(--shadow)}
+.value-banner-heading{font-size:clamp(1.2rem,2.5vw,1.6rem);font-weight:700;letter-spacing:-0.02em;margin:0 0 28px;text-align:center;color:var(--text)}
+.value-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px}
+.value-card{text-align:center;padding:20px 16px;border-radius:var(--radius);transition:transform 0.3s var(--ease),box-shadow 0.3s var(--ease)}
+.value-card:hover{transform:translateY(-4px)}
+.value-icon{width:48px;height:48px;margin:0 auto 14px;border-radius:14px;display:flex;align-items:center;justify-content:center;background:var(--accent-grad-soft);border:1px solid rgba(13,148,136,0.2);color:var(--accent)}
+.value-icon svg{width:24px;height:24px}
+.value-card h3{margin:0 0 8px;font-size:1rem;font-weight:700;letter-spacing:-0.01em}
+.value-card p{margin:0;color:var(--muted);font-size:0.88rem;line-height:1.5}
+@media (max-width:860px){.value-grid{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:440px){.value-grid{grid-template-columns:1fr}.value-banner-inner{padding:28px 20px}}
+
+/* ===== Sales Methodology ===== */
+.methodology-lead{color:var(--muted);font-size:1.05rem;max-width:680px;margin:0 0 32px}
+.methodology-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px}
+.method-card{padding:28px 24px;border-radius:var(--radius);background:linear-gradient(180deg,var(--card),var(--card-2));border:1px solid var(--border);box-shadow:var(--shadow);transition:transform 0.3s var(--ease),border-color 0.3s var(--ease),box-shadow 0.3s var(--ease)}
+.method-card:hover{transform:translateY(-4px);border-color:rgba(13,148,136,0.25);box-shadow:0 14px 48px -12px rgba(15,23,42,0.18)}
+.method-num{font-size:2.2rem;font-weight:800;letter-spacing:-0.03em;background:var(--accent-grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;line-height:1;margin:0 0 10px}
+.method-card h3{margin:0 0 10px;font-size:1.08rem;font-weight:700;letter-spacing:-0.01em}
+.method-card p{margin:0;color:var(--muted);font-size:0.92rem;line-height:1.6}
+@media (max-width:680px){.methodology-grid{grid-template-columns:1fr}}
+
 /* ===== Stats band ===== */
 .stats-band{
   display:grid;grid-template-columns:repeat(4,1fr);gap:16px;

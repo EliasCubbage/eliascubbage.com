@@ -51,7 +51,7 @@ document.addEventListener('DOMContentLoaded',function(){
   // ===== TYPEWRITER EFFECT =====
   var typedEl=document.getElementById('typed');
   if(typedEl){
-    var roles=['Business Development · Sales Professional','B2B Technology Sales','MEDDIC & SPIN Selling','Enterprise Account Executive','Pipeline Builder & Team Leader'];
+    var roles=['Enterprise Deal Closer · Revenue Driver','B2B Technology Sales · Top Performer','MEDDIC & SPIN Selling Certified','Enterprise Account Executive','Pipeline Builder & Team Leader','100%+ Quota Attainment'];
     var roleIdx=0,charIdx=0,deleting=false,typeTimer=null;
     function typeLoop(){
       var current=roles[roleIdx];
