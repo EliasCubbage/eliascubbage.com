@@ -21,6 +21,157 @@ document.addEventListener('DOMContentLoaded',function(){
     document.querySelectorAll('.reveal').forEach(function(el){ el.classList.add('visible'); });
   }
 
+  // ===== SCROLL PROGRESS BAR =====
+  var progressBar=document.getElementById('scroll-progress');
+  function updateScrollProgress(){
+    if(!progressBar) return;
+    var st=window.scrollY||document.documentElement.scrollTop;
+    var dh=document.documentElement.scrollHeight-document.documentElement.clientHeight;
+    var pct=dh>0?(st/dh)*100:0;
+    progressBar.style.width=pct+'%';
+  }
+  window.addEventListener('scroll',updateScrollProgress,{passive:true});
+  updateScrollProgress();
+
+  // ===== ACTIVE NAV HIGHLIGHTING =====
+  var navLinks=Array.prototype.slice.call(document.querySelectorAll('.nav a[data-nav]'));
+  var navSections=navLinks.map(function(a){ return document.querySelector(a.getAttribute('href')); }).filter(Boolean);
+  if('IntersectionObserver' in window && navSections.length){
+    var navObserver=new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if(entry.isIntersecting){
+          var id='#'+entry.target.id;
+          navLinks.forEach(function(l){ l.classList.toggle('active',l.getAttribute('href')===id); });
+        }
+      });
+    },{ rootMargin:'-45% 0px -50% 0px' });
+    navSections.forEach(function(s){ navObserver.observe(s); });
+  }
+
+  // ===== TYPEWRITER EFFECT =====
+  var typedEl=document.getElementById('typed');
+  if(typedEl){
+    var roles=['Data Scientist · Automation Engineer · Tax Accountant','ML Systems Builder','LLM & NLP Specialist','Automation & Workflow Engineer','Data-Driven Problem Solver'];
+    var roleIdx=0,charIdx=0,deleting=false,typeTimer=null;
+    function typeLoop(){
+      var current=roles[roleIdx];
+      if(!deleting){
+        charIdx++;
+        typedEl.textContent=current.substring(0,charIdx);
+        if(charIdx>=current.length){ deleting=true; typeTimer=setTimeout(typeLoop,1800); return; }
+        typeTimer=setTimeout(typeLoop,55);
+      } else {
+        charIdx--;
+        typedEl.textContent=current.substring(0,charIdx);
+        if(charIdx<=0){ deleting=false; roleIdx=(roleIdx+1)%roles.length; typeTimer=setTimeout(typeLoop,300); return; }
+        typeTimer=setTimeout(typeLoop,30);
+      }
+    }
+    typeLoop();
+  }
+
+  // ===== ANIMATED COUNTERS =====
+  function animateCounter(el){
+    var target=parseFloat(el.getAttribute('data-count'))||0;
+    var suffix=el.getAttribute('data-suffix')||'';
+    var dur=1400,start=null;
+    // For decimal suffixes like ".8%", count to integer part then append
+    var isDecimal=/^\.\d/.test(suffix);
+    var intTarget=isDecimal?Math.floor(target):target;
+    function step(ts){
+      if(!start) start=ts;
+      var p=Math.min((ts-start)/dur,1);
+      var eased=1-Math.pow(1-p,3);
+      var val=Math.floor(eased*intTarget);
+      el.textContent=val+suffix;
+      if(p<1) requestAnimationFrame(step);
+      else el.textContent=intTarget+suffix;
+    }
+    requestAnimationFrame(step);
+  }
+  var counters=Array.prototype.slice.call(document.querySelectorAll('[data-count]'));
+  if('IntersectionObserver' in window && counters.length){
+    var counterObserver=new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if(entry.isIntersecting){ animateCounter(entry.target); counterObserver.unobserve(entry.target); }
+      });
+    },{ threshold:0.4 });
+    counters.forEach(function(c){ counterObserver.observe(c); });
+  } else {
+    counters.forEach(function(c){ animateCounter(c); });
+  }
+
+  // ===== SKILL BAR ANIMATION =====
+  var skillFills=Array.prototype.slice.call(document.querySelectorAll('.sb-fill'));
+  if('IntersectionObserver' in window && skillFills.length){
+    var skillObserver=new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if(entry.isIntersecting){
+          var lvl=entry.target.getAttribute('data-level')||0;
+          entry.target.style.width=lvl+'%';
+          skillObserver.unobserve(entry.target);
+        }
+      });
+    },{ threshold:0.3 });
+    skillFills.forEach(function(f){ skillObserver.observe(f); });
+  } else {
+    skillFills.forEach(function(f){ f.style.width=(f.getAttribute('data-level')||0)+'%'; });
+  }
+
+  // ===== PROJECT FILTER =====
+  var filterBtns=Array.prototype.slice.call(document.querySelectorAll('.filter-btn'));
+  var projectCards=Array.prototype.slice.call(document.querySelectorAll('.projects-grid .card'));
+  filterBtns.forEach(function(btn){
+    btn.addEventListener('click',function(){
+      filterBtns.forEach(function(b){ b.classList.remove('active'); });
+      btn.classList.add('active');
+      var filter=btn.getAttribute('data-filter');
+      projectCards.forEach(function(card){
+        var cat=card.getAttribute('data-cat');
+        var show=(filter==='all'||cat===filter);
+        if(show){
+          card.classList.remove('hidden');
+          // re-trigger fade-in
+          card.classList.add('fade-out');
+          requestAnimationFrame(function(){ requestAnimationFrame(function(){ card.classList.remove('fade-out'); }); });
+        } else {
+          card.classList.add('fade-out');
+          setTimeout(function(){ card.classList.add('hidden'); },250);
+        }
+      });
+    });
+  });
+
+  // ===== CARD TILT =====
+  var tiltCards=Array.prototype.slice.call(document.querySelectorAll('.tilt'));
+  var isTouch=window.matchMedia('(hover:none)').matches;
+  if(!isTouch){
+    tiltCards.forEach(function(card){
+      card.addEventListener('mousemove',function(e){
+        var r=card.getBoundingClientRect();
+        var cx=e.clientX-r.left, cy=e.clientY-r.top;
+        var rx=((cy/r.height)-0.5)*-6;
+        var ry=((cx/r.width)-0.5)*6;
+        card.style.transform='translateY(-6px) perspective(800px) rotateX('+rx+'deg) rotateY('+ry+'deg)';
+      });
+      card.addEventListener('mouseleave',function(){ card.style.transform=''; });
+    });
+  }
+
+  // ===== MAGNETIC BUTTONS =====
+  var magnetics=Array.prototype.slice.call(document.querySelectorAll('.magnetic'));
+  if(!isTouch){
+    magnetics.forEach(function(el){
+      el.addEventListener('mousemove',function(e){
+        var r=el.getBoundingClientRect();
+        var x=e.clientX-r.left-r.width/2;
+        var y=e.clientY-r.top-r.height/2;
+        el.style.transform='translate('+(x*0.25)+'px,'+(y*0.4)+'px)';
+      });
+      el.addEventListener('mouseleave',function(){ el.style.transform=''; });
+    });
+  }
+
   // ===== CUBBLITZ GAME =====
   var canvas=document.getElementById('game-canvas');
   var scoreLabel=document.getElementById('game-score');

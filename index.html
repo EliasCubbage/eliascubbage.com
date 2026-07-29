@@ -16,12 +16,14 @@
   <meta name="twitter:card" content="summary" />
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%232f2f2f'/%3E%3Ctext x='16' y='22' text-anchor='middle' font-family='Inter,system-ui,sans-serif' font-size='16' font-weight='700' fill='%23e6eef6'%3EEC%3C/text%3E%3C/svg%3E" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles-cubblitz.css?v=2">
+  <link rel="stylesheet" href="styles-cubblitz.css?v=3">
 </head>
 <body>
+  <div class="scroll-progress" id="scroll-progress" aria-hidden="true"></div>
   <div class="bg-decor" aria-hidden="true">
     <div class="bg-glow glow-a"></div>
     <div class="bg-glow glow-b"></div>
+    <div class="bg-glow glow-c"></div>
     <div class="bg-grid"></div>
   </div>
   <header class="site-header">
@@ -32,10 +34,11 @@
       </a>
       <button id="nav-toggle" class="nav-toggle" aria-label="Toggle navigation">☰</button>
       <nav id="nav" class="nav">
-        <a href="#about">About</a>
-        <a href="#projects">Projects</a>
-        <a href="#professional">Background</a>
-        <a href="#game">Cubblitz</a>
+        <a href="#about" data-nav>About</a>
+        <a href="#projects" data-nav>Projects</a>
+        <a href="#stack" data-nav>Stack</a>
+        <a href="#professional" data-nav>Background</a>
+        <a href="#game" data-nav>Cubblitz</a>
       </nav>
     </div>
   </header>
@@ -43,20 +46,38 @@
     <section class="hero">
       <div class="container hero-inner">
         <div class="hero-content">
-          <p class="eyebrow">Data Scientist · Automation Engineer · Tax Accountant</p>
+          <p class="eyebrow"><span id="typed"></span><span class="typed-cursor" aria-hidden="true">▋</span></p>
           <h1>Elias Cubbage</h1>
           <p class="lead">I build ML systems and automation tools to solve real problems — from fair housing compliance to financial workflows.</p>
           <p class="cta-row">
-            <a class="btn primary" href="#projects">See work</a>
-            <a class="btn ghost" href="#contact">Get in touch</a>
+            <a class="btn primary magnetic" href="#projects">See work</a>
+            <a class="btn ghost magnetic" href="#contact">Get in touch</a>
           </p>
           <p class="links-row">
             <a class="chip" href="https://github.com/EliasCubbage" target="_blank" rel="noopener">GitHub</a>
             <a class="chip" href="https://www.linkedin.com/in/elias-cubbage/" target="_blank" rel="noopener">LinkedIn</a>
           </p>
+          <div class="hero-stats">
+            <div class="hero-stat">
+              <span class="hero-stat-num" data-count="3" data-suffix="+">0</span>
+              <span class="hero-stat-label">Years Experience</span>
+            </div>
+            <div class="hero-stat">
+              <span class="hero-stat-num" data-count="20" data-suffix="+">0</span>
+              <span class="hero-stat-label">Projects Shipped</span>
+            </div>
+            <div class="hero-stat">
+              <span class="hero-stat-num" data-count="5" data-suffix=".8%">0</span>
+              <span class="hero-stat-label">Churn Reduced</span>
+            </div>
+          </div>
         </div>
         <div class="hero-visual" aria-hidden="true">
           <div class="monogram-ring">
+            <div class="orbit orbit-1"></div>
+            <div class="orbit orbit-2"></div>
+            <div class="orbit-dot dot-1"></div>
+            <div class="orbit-dot dot-2"></div>
             <svg width="220" height="220" viewBox="0 0 220 220" xmlns="http://www.w3.org/2000/svg">
               <rect width="220" height="220" rx="28" fill="#14161c" />
               <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="Inter, system-ui, -apple-system, 'Segoe UI', Roboto" font-size="56" font-weight="800" fill="#e6eef6">EC</text>
@@ -65,82 +86,261 @@
         </div>
       </div>
     </section>
+
+    <section class="stats-band container reveal">
+      <div class="stat-card">
+        <span class="stat-num" data-count="60" data-suffix="%">0</span>
+        <span class="stat-label">Faster Turnaround</span>
+        <span class="stat-sub">Validation tooling at Accenture</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-num" data-count="5" data-suffix=".8%">0</span>
+        <span class="stat-label">Churn Reduction</span>
+        <span class="stat-sub">PySpark turnover analysis</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-num" data-count="3" data-suffix="+">0</span>
+        <span class="stat-label">Years in Data</span>
+        <span class="stat-sub">Analyst → Scientist → Engineer</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-num" data-count="4" data-suffix="">0</span>
+        <span class="stat-label">Roles Shipped</span>
+        <span class="stat-sub">Across 3 organizations</span>
+      </div>
+    </section>
+
     <section id="about" class="section container reveal">
       <h2 class="section-title">About</h2>
-      <p class="about-lead">I combine data science, machine learning, and financial expertise to build systems that scale. Experience building LLM-powered compliance tools and automation workflows for complex business problems. Currently working in tax accounting while developing automation and analytical solutions.</p>
-      <ul class="skills">
-        <li><span class="skill-dot"></span>Python & ML</li>
-        <li><span class="skill-dot"></span>LLMs & NLP</li>
-        <li><span class="skill-dot"></span>Data Science</li>
-        <li><span class="skill-dot"></span>Automation & Scripting</li>
-        <li><span class="skill-dot"></span>Financial Analysis</li>
-        <li><span class="skill-dot"></span>Tax Accounting</li>
-      </ul>
+      <div class="about-grid">
+        <div class="about-text">
+          <p class="about-lead">I combine data science, machine learning, and financial expertise to build systems that scale. Experience building LLM-powered compliance tools and automation workflows for complex business problems. Currently working in tax accounting while developing automation and analytical solutions.</p>
+          <ul class="skills">
+            <li><span class="skill-dot"></span>Python & ML</li>
+            <li><span class="skill-dot"></span>LLMs & NLP</li>
+            <li><span class="skill-dot"></span>Data Science</li>
+            <li><span class="skill-dot"></span>Automation & Scripting</li>
+            <li><span class="skill-dot"></span>Financial Analysis</li>
+            <li><span class="skill-dot"></span>Tax Accounting</li>
+          </ul>
+        </div>
+        <div class="skill-bars">
+          <h3 class="skill-bars-title">Proficiency</h3>
+          <div class="skill-bar">
+            <span class="sb-label">Python & ML</span>
+            <div class="sb-track"><div class="sb-fill" data-level="92"></div></div>
+            <span class="sb-pct">92</span>
+          </div>
+          <div class="skill-bar">
+            <span class="sb-label">LLMs & NLP</span>
+            <div class="sb-track"><div class="sb-fill" data-level="88"></div></div>
+            <span class="sb-pct">88</span>
+          </div>
+          <div class="skill-bar">
+            <span class="sb-label">Data Science</span>
+            <div class="sb-track"><div class="sb-fill" data-level="90"></div></div>
+            <span class="sb-pct">90</span>
+          </div>
+          <div class="skill-bar">
+            <span class="sb-label">Automation</span>
+            <div class="sb-track"><div class="sb-fill" data-level="85"></div></div>
+            <span class="sb-pct">85</span>
+          </div>
+          <div class="skill-bar">
+            <span class="sb-label">SQL & Databases</span>
+            <div class="sb-track"><div class="sb-fill" data-level="82"></div></div>
+            <span class="sb-pct">82</span>
+          </div>
+          <div class="skill-bar">
+            <span class="sb-label">Financial Analysis</span>
+            <div class="sb-track"><div class="sb-fill" data-level="80"></div></div>
+            <span class="sb-pct">80</span>
+          </div>
+        </div>
+      </div>
     </section>
+
     <section id="projects" class="section container reveal">
       <h2 class="section-title">Selected Projects</h2>
+      <div class="filter-bar" role="tablist" aria-label="Filter projects">
+        <button class="filter-btn active" type="button" data-filter="all">All</button>
+        <button class="filter-btn" type="button" data-filter="ml">ML / AI</button>
+        <button class="filter-btn" type="button" data-filter="automation">Automation</button>
+        <button class="filter-btn" type="button" data-filter="data">Data</button>
+      </div>
       <div class="projects-grid">
-        <article class="card">
+        <article class="card tilt" data-cat="ml">
           <div class="card-glow"></div>
+          <div class="card-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a4 4 0 0 0-4 4 4 4 0 0 0-1 7.9A4 4 0 0 0 12 21a4 4 0 0 0 5-6.1A4 4 0 0 0 16 7a4 4 0 0 0-4-4Z"/><path d="M12 8v8M9 11h6"/></svg>
+          </div>
           <h3>Fair Housing Compliance LLM</h3>
           <p>Built and trained an LLM system to detect fair housing violations in real estate listings. Achieved high precision classification on complex legal language patterns and bias detection.</p>
           <p class="card-tags"><span class="tag">LLM</span><span class="tag">NLP</span><span class="tag">Compliance</span></p>
           <p class="card-actions"><a class="btn" href="https://github.com/EliasCubbage" target="_blank" rel="noopener">View on GitHub</a></p>
         </article>
-        <article class="card">
+        <article class="card tilt" data-cat="automation">
           <div class="card-glow"></div>
+          <div class="card-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 7h8M8 11h8M8 15h5"/><circle cx="17" cy="16" r="1.5"/></svg>
+          </div>
           <h3>Tax Automation & Analysis</h3>
           <p>Designed workflows and analytical tools to streamline tax accounting processes. Focus on accuracy, compliance, and scalable solutions for complex tax scenarios.</p>
           <p class="card-tags"><span class="tag">Automation</span><span class="tag">Finance</span><span class="tag">Analytics</span></p>
           <p class="card-actions"><a class="btn" href="#">Details</a></p>
         </article>
-        <article class="card">
+        <article class="card tilt" data-cat="data">
           <div class="card-glow"></div>
+          <div class="card-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="2.5"/><circle cx="18" cy="6" r="2.5"/><circle cx="12" cy="18" r="2.5"/><path d="M7.5 7.5 11 16M16.5 7.5 13 16M8 6h8"/></svg>
+          </div>
           <h3>Data Science & ML Systems</h3>
           <p>Experience with machine learning pipeline development, model training, and deployment. Specialized in NLP and predictive analytics for business applications.</p>
           <p class="card-tags"><span class="tag">ML Pipelines</span><span class="tag">Deployment</span><span class="tag">Predictive</span></p>
           <p class="card-actions"><a class="btn" href="https://github.com/EliasCubbage" target="_blank" rel="noopener">Explore</a></p>
         </article>
+        <article class="card tilt" data-cat="ml">
+          <div class="card-glow"></div>
+          <div class="card-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.5"/><path d="M5 20a7 7 0 0 1 14 0"/><circle cx="18" cy="6" r="1.2"/><circle cx="6" cy="6" r="1.2"/></svg>
+          </div>
+          <h3>Candidate Recommendation Engine</h3>
+          <p>Fine-tuned LLMs to prioritize candidates based on interview responses, reducing labor hours for clients. Trained and deployed recommendation models contributing to a measurable sales increase.</p>
+          <p class="card-tags"><span class="tag">LLM</span><span class="tag">Recommendation</span><span class="tag">Deployment</span></p>
+          <p class="card-actions"><a class="btn" href="https://github.com/EliasCubbage" target="_blank" rel="noopener">View on GitHub</a></p>
+        </article>
+        <article class="card tilt" data-cat="data">
+          <div class="card-glow"></div>
+          <div class="card-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg>
+          </div>
+          <h3>Turnover Analytics with PySpark</h3>
+          <p>Used PySpark to analyze employee turnover at scale and recommend actions that reduced churn by 5.8%. Built data pipelines feeding dashboards and SQL/Azure-based data stores.</p>
+          <p class="card-tags"><span class="tag">PySpark</span><span class="tag">Analytics</span><span class="tag">Azure</span></p>
+          <p class="card-actions"><a class="btn" href="https://github.com/EliasCubbage" target="_blank" rel="noopener">Explore</a></p>
+        </article>
+        <article class="card tilt" data-cat="automation">
+          <div class="card-glow"></div>
+          <div class="card-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6"/><path d="M20 4 10 14"/><path d="M5 13v6h6"/><path d="M5 19l7-7"/></svg>
+          </div>
+          <h3>Validation & Pipeline Tooling</h3>
+          <p>Built internal Python tools for validation studies that reduced turnaround time by 60%. Developed data pipelines to populate dashboards and SQL/Azure-based data stores.</p>
+          <p class="card-tags"><span class="tag">Python</span><span class="tag">Pipelines</span><span class="tag">Tooling</span></p>
+          <p class="card-actions"><a class="btn" href="https://github.com/EliasCubbage" target="_blank" rel="noopener">View on GitHub</a></p>
+        </article>
       </div>
     </section>
+
+    <section id="stack" class="section container reveal">
+      <h2 class="section-title">Tech Stack</h2>
+      <div class="marquee" aria-hidden="true">
+        <div class="marquee-track">
+          <span class="marquee-item">Python</span><span class="marquee-dot">•</span>
+          <span class="marquee-item">PySpark</span><span class="marquee-dot">•</span>
+          <span class="marquee-item">SQL</span><span class="marquee-dot">•</span>
+          <span class="marquee-item">Azure</span><span class="marquee-dot">•</span>
+          <span class="marquee-item">LLMs</span><span class="marquee-dot">•</span>
+          <span class="marquee-item">NLP</span><span class="marquee-dot">•</span>
+          <span class="marquee-item">scikit-learn</span><span class="marquee-dot">•</span>
+          <span class="marquee-item">R</span><span class="marquee-dot">•</span>
+          <span class="marquee-item">Pandas</span><span class="marquee-dot">•</span>
+          <span class="marquee-item">Automation</span><span class="marquee-dot">•</span>
+          <span class="marquee-item">Python</span><span class="marquee-dot">•</span>
+          <span class="marquee-item">PySpark</span><span class="marquee-dot">•</span>
+          <span class="marquee-item">SQL</span><span class="marquee-dot">•</span>
+          <span class="marquee-item">Azure</span><span class="marquee-dot">•</span>
+          <span class="marquee-item">LLMs</span><span class="marquee-dot">•</span>
+          <span class="marquee-item">NLP</span><span class="marquee-dot">•</span>
+          <span class="marquee-item">scikit-learn</span><span class="marquee-dot">•</span>
+          <span class="marquee-item">R</span><span class="marquee-dot">•</span>
+          <span class="marquee-item">Pandas</span><span class="marquee-dot">•</span>
+          <span class="marquee-item">Automation</span><span class="marquee-dot">•</span>
+        </div>
+      </div>
+      <div class="stack-grid">
+        <div class="stack-col">
+          <h3 class="stack-col-title">Languages</h3>
+          <ul class="stack-list">
+            <li>Python</li><li>SQL</li><li>R</li><li>JavaScript</li>
+          </ul>
+        </div>
+        <div class="stack-col">
+          <h3 class="stack-col-title">ML / AI</h3>
+          <ul class="stack-list">
+            <li>LLM Fine-tuning</li><li>NLP</li><li>scikit-learn</li><li>PySpark</li>
+          </ul>
+        </div>
+        <div class="stack-col">
+          <h3 class="stack-col-title">Data</h3>
+          <ul class="stack-list">
+            <li>Azure</li><li>Pandas</li><li>Dashboards</li><li>ETL Pipelines</li>
+          </ul>
+        </div>
+        <div class="stack-col">
+          <h3 class="stack-col-title">Domain</h3>
+          <ul class="stack-list">
+            <li>Tax Accounting</li><li>Compliance</li><li>Financial Analysis</li><li>Automation</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
     <section id="professional" class="section container reveal">
       <h2 class="section-title">Professional Background</h2>
       <div class="cv-panel">
         <div class="cv-item">
           <div class="cv-marker"></div>
-          <h4>Automation Engineer</h4>
+          <div class="cv-head">
+            <h4>Automation Engineer</h4>
+            <span class="cv-badge">Current</span>
+          </div>
           <p class="cv-meta"><em>David L. Mortimer CPA PC · Jan 2026 - Present</em></p>
           <p>Focused on workflow automation, process engineering, and operational improvements.</p>
         </div>
         <div class="cv-item">
           <div class="cv-marker"></div>
-          <h4>Data Scientist</h4>
+          <div class="cv-head">
+            <h4>Data Scientist</h4>
+            <span class="cv-badge">Full-time</span>
+          </div>
           <p class="cv-meta"><em>Accenture · Jul 2024 - Jun 2026</em></p>
           <p>Fine-tuned LLMs to prioritize candidates based on interview responses, reducing labor hours for clients. Used PySpark to analyze turnover and recommend actions that reduced churn by 5.8%. Trained and deployed models for candidate recommendation, contributing to a measurable sales increase.</p>
         </div>
         <div class="cv-item">
           <div class="cv-marker"></div>
-          <h4>Data Analyst</h4>
+          <div class="cv-head">
+            <h4>Data Analyst</h4>
+            <span class="cv-badge">Full-time</span>
+          </div>
           <p class="cv-meta"><em>Accenture · Jan 2024 - Jul 2024</em></p>
           <p>Built internal Python tools for validation studies, reduced turnaround time by 60%, and developed data pipelines to populate dashboards and SQL/Azure-based data stores.</p>
         </div>
         <div class="cv-item">
           <div class="cv-marker"></div>
-          <h4>Patent Database Intern</h4>
+          <div class="cv-head">
+            <h4>Patent Database Intern</h4>
+            <span class="cv-badge">Internship</span>
+          </div>
           <p class="cv-meta"><em>Novotech · Jun 2023 - Dec 2023</em></p>
           <p>Applied quantitative analysis to improve internal operations, managed inventory tracking in Excel and SQL, and supported accounting spreadsheets and financial reporting.</p>
         </div>
         <div class="cv-item">
           <div class="cv-marker"></div>
-          <h4>Undergraduate Research Assistant</h4>
+          <div class="cv-head">
+            <h4>Undergraduate Research Assistant</h4>
+            <span class="cv-badge">Research</span>
+          </div>
           <p class="cv-meta"><em>Old Dominion University · Jan 2023 - Jun 2023</em></p>
           <p>Created a remotely accessible SQL database, used R for data cleaning and regression analysis, and built Python scripts to collect data from municipal and private APIs.</p>
         </div>
       </div>
     </section>
+
     <section id="contact" class="section container reveal">
       <h2 class="section-title">Contact</h2>
       <div class="contact-card">
+        <div class="contact-status"><span class="status-dot"></span>Available for new projects</div>
         <p class="contact-lead">If you'd like to work together, email me at</p>
         <p class="contact-email"><span id="email-reveal"></span></p>
         <p class="cta-row">
@@ -149,6 +349,7 @@
         </p>
       </div>
     </section>
+
     <section id="game" class="section container reveal">
       <h2>CUBBLITZ</h2>
       <p>Defend the grid. Clear every wave. Survive as long as you can.</p>
