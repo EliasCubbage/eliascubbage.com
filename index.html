@@ -16,7 +16,7 @@
   <meta name="twitter:card" content="summary" />
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230d9488'/%3E%3Ctext x='16' y='22' text-anchor='middle' font-family='Inter,system-ui,sans-serif' font-size='16' font-weight='700' fill='%23ffffff'%3EEC%3C/text%3E%3C/svg%3E" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles-cubblitz.css?v=6">
+  <link rel="stylesheet" href="styles-cubblitz.css?v=7">
 </head>
 <body>
   <div class="cursor-dot" id="cursor-dot" aria-hidden="true"></div>
@@ -149,8 +149,25 @@
       <div class="contact-card">
         <div class="contact-status"><span class="status-dot"></span>Available for new opportunities</div>
         <p class="contact-lead">Let's connect — reach me at</p>
-        <p class="contact-email"><span id="email-reveal"></span></p>
-        <p class="contact-phone"><a href="tel:+17038638575">(703) 863-8575</a></p>
+        <div id="captcha-gate" class="captcha-gate">
+          <p class="captcha-question">To protect against automated spam bots, please solve this quick question:</p>
+          <div class="captcha-challenge" aria-live="polite">
+            <span id="captcha-problem" class="captcha-problem"></span>
+          </div>
+          <form id="captcha-form" class="captcha-form" autocomplete="off" aria-label="Captcha verification">
+            <label for="captcha-input" class="captcha-label">Your answer:</label>
+            <input type="text" id="captcha-input" class="captcha-input" inputmode="numeric" autocomplete="off" aria-required="true" />
+            <button type="submit" class="btn primary captcha-submit">Reveal Contact Info</button>
+          </form>
+          <p id="captcha-error" class="captcha-error" role="alert" hidden>That's not right — please try again.</p>
+          <noscript>
+            <p class="captcha-noscript">Enable JavaScript to view contact information, or reach out via <a href="https://www.linkedin.com/in/elias-cubbage/" target="_blank" rel="noopener">LinkedIn</a>.</p>
+          </noscript>
+        </div>
+        <div id="contact-info" class="contact-info" hidden>
+          <p class="contact-email"><span id="email-reveal"></span></p>
+          <p class="contact-phone" id="contact-phone"></p>
+        </div>
         <p class="cta-row">
           <a class="chip" href="https://www.linkedin.com/in/elias-cubbage/" target="_blank" rel="noopener">LinkedIn</a>
           <a class="chip" href="https://github.com/EliasCubbage" target="_blank" rel="noopener">GitHub</a>
@@ -222,11 +239,80 @@
   <script src="app-cubblitz.js"></script>
   <script>
     (function() {
-      var a = [101,108,105,97,115,46,99,117,98,98,97,103,101,64,103,109,97,105,108,46,99,111,109];
-      var e = document.getElementById('email-reveal');
-      if (e) {
-        var m = String.fromCharCode.apply(null, a);
-        e.innerHTML = '<a href="mailto:' + m + '">' + m + '</a>';
+      'use strict';
+
+      // Contact info obfuscation (char codes — not in plain HTML)
+      var EMAIL_CODES = [101,108,105,97,115,46,99,117,98,98,97,103,101,64,103,109,97,105,108,46,99,111,109];
+      var PHONE_CODES = [49,55,48,51,56,54,51,56,53,55,53];
+
+      var emailStr = String.fromCharCode.apply(null, EMAIL_CODES);
+      var phoneStr  = String.fromCharCode.apply(null, PHONE_CODES);
+
+      var gate      = document.getElementById('captcha-gate');
+      var info      = document.getElementById('contact-info');
+      var emailEl   = document.getElementById('email-reveal');
+      var phoneEl   = document.getElementById('contact-phone');
+      var problemEl = document.getElementById('captcha-problem');
+      var inputEl   = document.getElementById('captcha-input');
+      var formEl    = document.getElementById('captcha-form');
+      var errorEl   = document.getElementById('captcha-error');
+
+      if (!gate || !info) return;
+
+      var captchaA = 0, captchaB = 0, captchaAnswer = 0;
+
+      function generateCaptcha() {
+        captchaA = Math.floor(Math.random() * 13) + 3;   // 3–15
+        captchaB = Math.floor(Math.random() * 13) + 3;   // 3–15
+        captchaAnswer = captchaA + captchaB;
+        problemEl.textContent = captchaA + ' + ' + captchaB + ' = ?';
+      }
+
+      function revealContact() {
+        if (emailEl) {
+          emailEl.innerHTML = '<a href="mailto:' + emailStr + '">' + emailStr + '</a>';
+        }
+        if (phoneEl) {
+          var formatted = '(' + phoneStr.substring(1, 4) + ') ' + phoneStr.substring(4, 7) + '-' + phoneStr.substring(7);
+          phoneEl.innerHTML = '<a href="tel:+' + phoneStr + '">' + formatted + '</a>';
+        }
+        gate.setAttribute('hidden', '');
+        info.removeAttribute('hidden');
+        try { sessionStorage.setItem('captchaPassed', '1'); } catch (e) {}
+      }
+
+      function showGate() {
+        gate.removeAttribute('hidden');
+        info.setAttribute('hidden', '');
+        generateCaptcha();
+        if (inputEl) { inputEl.value = ''; inputEl.focus(); }
+        if (errorEl) errorEl.setAttribute('hidden', '');
+      }
+
+      // Check sessionStorage — skip captcha if already passed this session
+      try {
+        if (sessionStorage.getItem('captchaPassed') === '1') {
+          revealContact();
+        } else {
+          showGate();
+        }
+      } catch (e) {
+        showGate();
+      }
+
+      // Form submit handler
+      if (formEl) {
+        formEl.addEventListener('submit', function(e) {
+          e.preventDefault();
+          var val = parseInt(inputEl.value.trim(), 10);
+          if (val === captchaAnswer) {
+            revealContact();
+          } else {
+            if (errorEl) errorEl.removeAttribute('hidden');
+            generateCaptcha();
+            if (inputEl) { inputEl.value = ''; inputEl.focus(); }
+          }
+        });
       }
     })();
   </script>
