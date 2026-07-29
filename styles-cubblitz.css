@@ -187,6 +187,7 @@ body{
 .about-grid{display:grid;grid-template-columns:1fr;gap:40px;align-items:start;max-width:800px;margin:0 auto}
 @media (max-width:860px){.about-grid{grid-template-columns:1fr;gap:28px}}
 .about-lead{color:var(--muted);font-size:1.05rem;max-width:720px;margin:0 auto 24px;text-align:center}
+.about-text{text-align:center}
 .skills{display:flex;gap:10px;flex-wrap:wrap;list-style:none;padding:0;margin:0}
 .skills li{
   display:inline-flex;align-items:center;gap:8px;
