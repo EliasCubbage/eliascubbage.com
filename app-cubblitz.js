@@ -1,6 +1,9 @@
 document.addEventListener('DOMContentLoaded',function(){
   'use strict';
 
+  // Ensure page starts at the top
+  window.scrollTo(0,0);
+
   // mobile nav toggle
   var toggle=document.getElementById('nav-toggle');
   var nav=document.getElementById('nav');
