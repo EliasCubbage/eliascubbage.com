@@ -78,7 +78,6 @@ body{
   display:inline-flex;align-items:center;justify-content:center;
   width:32px;height:32px;border-radius:9px;
   background:var(--accent-grad);color:#fff;font-weight:800;font-size:0.85rem;letter-spacing:0.5px;
-  box-shadow:0 4px 14px -4px rgba(13,148,136,0.4);
 }
 .brand-name{font-weight:600;font-size:0.98rem;letter-spacing:-0.01em}
 @media (max-width:520px){.brand-name{display:none}}
