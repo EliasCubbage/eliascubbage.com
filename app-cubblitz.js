@@ -160,7 +160,7 @@ document.addEventListener('DOMContentLoaded',function(){
 
     // game state
     var keys={left:false,right:false,shoot:false};
-    var player={x:W/2-18,y:H-48,w:36,h:16,speed:5,invuln:0,powerType:null,powerTimer:0,powerType2:null,powerTimer2:0};
+    var player={x:W/2-18,y:H-48,w:36,h:16,speed:5,invuln:0,powerType:null,powerTimer:0,powerType2:null,powerTimer2:0,shieldHP:0,bulletDamage:1,bulletSpeed:7};
     var bullets=[];
     var enemies=[];
     var enemyBullets=[];
@@ -174,7 +174,7 @@ document.addEventListener('DOMContentLoaded',function(){
       stars.push({x:Math.random()*W,y:Math.random()*H,r:Math.random()*1.5+0.5,s:Math.random()*0.6+0.1,tw:Math.random()*Math.PI*2});
     }
 
-    var frame=0,level=1,score=0,lives=3,gameOver=true,gameStarted=false,gamePaused=false,shootCooldown=0,shake=0,combo=0,comboTimer=0,playerExploding=false,playerExplodeTimer=0;
+    var frame=0,level=1,score=0,lives=3,gameOver=true,gameStarted=false,gamePaused=false,shootCooldown=0,shake=0,combo=0,comboTimer=0,playerExploding=false,playerExplodeTimer=0,autoFireTimer=0,waitingForUpgrade=false;
     // formation and dive state (Galaga-style lockstep)
     var formationX=0, formationY=0, diveCountdown=0;
 
@@ -300,6 +300,134 @@ document.addEventListener('DOMContentLoaded',function(){
     }
     function hideOverlay(){ if(overlay) overlay.classList.remove('open'); }
 
+    // ===== PERMANENT UPGRADE SYSTEM =====
+    var upgradeDefs=[
+      {id:'rapid',name:'Rapid Fire',desc:'Fire rate +',icon:'⚡',maxLevel:3},
+      {id:'spread',name:'Spread Shot',desc:'Extra bullets +',icon:'✦',maxLevel:3},
+      {id:'shield',name:'Shield',desc:'+1 shield HP',icon:'🛡',maxLevel:3},
+      {id:'speed',name:'Speed Boost',desc:'Move speed +',icon:'➤',maxLevel:3},
+      {id:'bigBullets',name:'Big Bullets',desc:'Damage +',icon:'◆',maxLevel:3},
+      {id:'extraLife',name:'Extra Life',desc:'+1 life',icon:'♥',maxLevel:1},
+      {id:'autoFire',name:'Auto-Fire',desc:'Auto-fire when idle',icon:'⟳',maxLevel:1},
+      {id:'piercing',name:'Piercing',desc:'Bullets pass through enemies',icon:'→',maxLevel:1},
+      {id:'magnet',name:'Magnet',desc:'Attract power-ups',icon:'🧲',maxLevel:1},
+      {id:'bulletSpeed',name:'Bullet Speed',desc:'Bullet speed +',icon:'↑',maxLevel:3}
+    ];
+    var upgrades={};
+    function initUpgrades(){
+      upgradeDefs.forEach(function(def){ upgrades[def.id]=0; });
+    }
+    initUpgrades();
+
+    var upgradePickerEl=document.getElementById('upgrade-picker');
+    var upgradeCards=document.querySelectorAll('.upgrade-card');
+
+    function getAvailableUpgrades(){
+      return upgradeDefs.filter(function(def){ return upgrades[def.id]<def.maxLevel; });
+    }
+
+    function showUpgradePicker(){
+      waitingForUpgrade=true;
+      gamePaused=true;
+      var available=getAvailableUpgrades();
+      // If no upgrades available, skip picker
+      if(available.length===0){
+        advanceAfterUpgrade();
+        return;
+      }
+      // Shuffle and pick up to 3
+      var shuffled=available.slice();
+      for(var ui=shuffled.length-1;ui>0;ui--){
+        var uj=Math.floor(Math.random()*(ui+1));
+        var ut=shuffled[ui]; shuffled[ui]=shuffled[uj]; shuffled[uj]=ut;
+      }
+      var picks=shuffled.slice(0,3);
+      for(var ci=0;ci<3;ci++){
+        var card=upgradeCards[ci];
+        var iconEl=document.getElementById('uc-icon-'+ci);
+        var nameEl=document.getElementById('uc-name-'+ci);
+        var descEl=document.getElementById('uc-desc-'+ci);
+        var levelEl=document.getElementById('uc-level-'+ci);
+        if(ci<picks.length){
+          var pick=picks[ci];
+          var curLevel=upgrades[pick.id];
+          card.style.display='block';
+          card.setAttribute('data-upgrade-id',pick.id);
+          iconEl.textContent=pick.icon;
+          nameEl.textContent=pick.name;
+          descEl.textContent=pick.desc+(pick.maxLevel>1?' ('+(curLevel+1)+'/'+pick.maxLevel+')':'');
+          // Show level dots
+          levelEl.innerHTML='';
+          if(pick.maxLevel>1){
+            for(var di=0;di<pick.maxLevel;di++){
+              var dot=document.createElement('span');
+              dot.className='dot'+(di<curLevel+1?' filled':'')+(di===pick.maxLevel-1&&di<curLevel+1?' filled-max':'');
+              levelEl.appendChild(dot);
+            }
+          }
+        } else {
+          card.style.display='none';
+        }
+      }
+      upgradePickerEl.classList.add('open');
+    }
+
+    function applyUpgrade(upgradeId){
+      var def=upgradeDefs.find(function(d){ return d.id===upgradeId; });
+      if(!def) return;
+      upgrades[upgradeId]++;
+      var level=upgrades[upgradeId];
+      if(upgradeId==='rapid'){
+        spawnFloatText(W/2,H/2-20,'RAPID FIRE +','#ff66b2');
+      } else if(upgradeId==='spread'){
+        spawnFloatText(W/2,H/2-20,'SPREAD SHOT +','#66cc55');
+      } else if(upgradeId==='shield'){
+        player.shieldHP++;
+        spawnFloatText(W/2,H/2-20,'SHIELD +'+(player.shieldHP),'#4488ff');
+      } else if(upgradeId==='speed'){
+        player.speed++;
+        spawnFloatText(W/2,H/2-20,'SPEED +','#ffcc44');
+      } else if(upgradeId==='bigBullets'){
+        player.bulletDamage++;
+        spawnFloatText(W/2,H/2-20,'BIG BULLETS +','#cc88ff');
+      } else if(upgradeId==='extraLife'){
+        lives++;
+        setLabels();
+        spawnFloatText(W/2,H/2-20,'+1 LIFE','#ff6644');
+      } else if(upgradeId==='autoFire'){
+        spawnFloatText(W/2,H/2-20,'AUTO-FIRE','#44ffcc');
+      } else if(upgradeId==='piercing'){
+        spawnFloatText(W/2,H/2-20,'PIERCING','#ffd700');
+      } else if(upgradeId==='magnet'){
+        spawnFloatText(W/2,H/2-20,'MAGNET','#88ddff');
+      } else if(upgradeId==='bulletSpeed'){
+        player.bulletSpeed++;
+        spawnFloatText(W/2,H/2-20,'BULLET SPEED +','#88ff88');
+      }
+      upgradePickerEl.classList.remove('open');
+      advanceAfterUpgrade();
+    }
+
+    function advanceAfterUpgrade(){
+      level+=1;
+      spawnWave();
+      setLabels();
+      setStatus('Wave cleared! Level '+level);
+      waitingForUpgrade=false;
+      gamePaused=false;
+    }
+
+    // upgrade card click handlers
+    function handleUpgradeClick(e){
+      var card=e.currentTarget;
+      var upgradeId=card.getAttribute('data-upgrade-id');
+      if(upgradeId) applyUpgrade(upgradeId);
+    }
+    upgradeCards.forEach(function(c){
+      c.addEventListener('click',handleUpgradeClick);
+      c.addEventListener('touchend',function(e){ e.preventDefault(); handleUpgradeClick(e); });
+    });
+
     // ===== ENEMY TYPES =====
     var enemyTypes=[
       {w:28,h:16,bodyColor:'hsl(180,70%,55%)',coreColor:'hsl(180,50%,35%)',shape:'diamond',hp:1,score:10},
@@ -420,12 +548,12 @@ document.addEventListener('DOMContentLoaded',function(){
     // ===== GAME FLOW =====
     function startGame(){
       initAudio();
-      player.x=W/2-18; player.invuln=0; player.powerType=null; player.powerTimer=0; player.powerType2=null; player.powerTimer2=0;
+      player.x=W/2-18; player.invuln=0; player.powerType=null; player.powerTimer=0; player.powerType2=null; player.powerTimer2=0; player.shieldHP=0; player.bulletDamage=1; player.bulletSpeed=7;
       bullets=[]; enemyBullets=[]; particles=[]; powerups=[]; floatTexts=[];
-      frame=0; level=1; score=0; lives=3; combo=0; comboTimer=0;
+      frame=0; level=1; score=0; lives=3; combo=0; comboTimer=0; autoFireTimer=0; waitingForUpgrade=false;
       gameOver=false; gameStarted=true; gamePaused=false; shootCooldown=0; shake=0; playerExploding=false; playerExplodeTimer=0;
-      spawnWave(); setLabels(); setStatus('Use arrows and Space to shoot.');
-      hideOverlay();
+      initUpgrades(); spawnWave(); setLabels(); setStatus('Use arrows and Space to shoot.');
+      hideOverlay(); upgradePickerEl.classList.remove('open');
       if(pauseBtn){ pauseBtn.disabled=false; pauseBtn.textContent='Pause'; }
     }
     function stopGame(){
@@ -516,6 +644,16 @@ document.addEventListener('DOMContentLoaded',function(){
       if(gameStarted&&!gameOver&&!gamePaused){
         ctx.fillStyle='rgba(255,180,50,'+(0.4+Math.sin(frame*0.2)*0.2)+')';
         ctx.fillRect(px+8,py+ph-2,pw-16,5);
+      }
+      // shield HP indicator
+      if(player.shieldHP>0){
+        ctx.fillStyle='rgba(68,136,255,'+(0.3+Math.sin(frame*0.1)*0.1)+')';
+        ctx.fillRect(px-2,py-2,pw+4,ph+4);
+        ctx.fillStyle='#4488ff';
+        ctx.font='bold 9px Inter, system-ui, sans-serif';
+        ctx.textAlign='center';
+        ctx.fillText('🛡'+player.shieldHP,px+pw/2,py-22);
+        ctx.textAlign='left';
       }
       // power-up indicator - show both if stacked
       if(player.powerType||player.powerType2){
@@ -787,7 +925,14 @@ document.addEventListener('DOMContentLoaded',function(){
         if(b.hit) return;
         enemies.forEach(function(e){
           if(e.alive&&b.x<e.x+e.w&&b.x+b.w>e.x&&b.y<e.y+e.h&&b.y+b.h>e.y){
-            e.hp-=1; e.hitFlash=4; b.hit=true; sfxHit();
+            // Piercing: track which enemies this bullet already hit
+            if(b.piercing){
+              var eKey=e.gridX+','+e.gridY+','+e.shape;
+              if(b._hitEnemies[eKey]) return;
+              b._hitEnemies[eKey]=true;
+            }
+            e.hp-=player.bulletDamage; e.hitFlash=4; sfxHit();
+            if(!b.piercing) b.hit=true;
             if(e.hp<=0){
               e.alive=false;
               spawnExplosion(e.x+e.w/2,e.y+e.h/2,e.bodyColor,e.shape==='boss'?30:12);
@@ -806,6 +951,27 @@ document.addEventListener('DOMContentLoaded',function(){
       bullets=bullets.filter(function(b){ return !b.hit; });
     }
 
+    function damagePlayer(){
+      if(player.shieldHP>0){
+        player.shieldHP--;
+        shake=6; sfxPlayerHit();
+        spawnExplosion(player.x+player.w/2,player.y+player.h/2,'#4488ff',8);
+        player.invuln=120;
+        setStatus('Shield hit! Shield HP: '+player.shieldHP);
+        return false;
+      }
+      lives-=1; setLabels(); shake=10; sfxPlayerHit();
+      spawnExplosion(player.x+player.w/2,player.y+player.h/2,'#ff4d2a',14);
+      spawnExplosion(player.x+player.w/2,player.y+player.h/2,'#ff9933',10);
+      spawnExplosion(player.x+player.w/2,player.y+player.h/2,'#ffcc00',8);
+      spawnExplosion(player.x+player.w/2,player.y+player.h/2,'#ffffff',6);
+      player.invuln=120;
+      combo=0;
+      if(lives<=0){ handleGameOver(); return true; }
+      setStatus('Hit! Lives left: '+lives);
+      return false;
+    }
+
     function updateEnemyBullets(){
       enemyBullets=enemyBullets.filter(function(b){ return b.y<H+10 && (!b.vx || (b.x>-10 && b.x<W+10)); });
       enemyBullets.forEach(function(b){
@@ -816,15 +982,7 @@ document.addEventListener('DOMContentLoaded',function(){
         if(b.hit) return;
         if(player.invuln<=0 && b.x<player.x+player.w&&b.x+b.w>player.x&&b.y<player.y+player.h&&b.y+b.h>player.y){
           b.hit=true;
-          lives-=1; setLabels(); shake=10; sfxPlayerHit();
-          spawnExplosion(player.x+player.w/2,player.y+player.h/2,'#ff4d2a',14);
-          spawnExplosion(player.x+player.w/2,player.y+player.h/2,'#ff9933',10);
-          spawnExplosion(player.x+player.w/2,player.y+player.h/2,'#ffcc00',8);
-          spawnExplosion(player.x+player.w/2,player.y+player.h/2,'#ffffff',6);
-          player.invuln=120;
-          combo=0;
-          if(lives<=0){ handleGameOver(); }
-          else { setStatus('Hit! Lives left: '+lives); }
+          damagePlayer();
         }
       });
       enemyBullets=enemyBullets.filter(function(b){ return !b.hit; });
@@ -836,19 +994,13 @@ document.addEventListener('DOMContentLoaded',function(){
       enemies.forEach(function(e){
         if(!e.alive) return;
         if(e.x<player.x+player.w&&e.x+e.w>player.x&&e.y<player.y+player.h&&e.y+e.h>player.y){
-          // Contact damage!
-          lives-=1; setLabels(); shake=12; sfxPlayerHit();
-          spawnExplosion(player.x+player.w/2,player.y+player.h/2,'#ff4d2a',14);
-          spawnExplosion(player.x+player.w/2,player.y+player.h/2,'#ff9933',10);
-          spawnExplosion(player.x+player.w/2,player.y+player.h/2,'#ffcc00',8);
-          spawnExplosion(player.x+player.w/2,player.y+player.h/2,'#ffffff',6);
-          // Destroy the enemy on contact too
+          // Destroy the enemy on contact
           e.alive=false;
           spawnExplosion(e.x+e.w/2,e.y+e.h/2,e.bodyColor,12);
-          player.invuln=120;
-          combo=0;
-          if(lives<=0){ handleGameOver(); }
-          else { setStatus('Collision! Lives left: '+lives); }
+          if(!damagePlayer()){
+            // If player still alive, extra effects
+            spawnExplosion(player.x+player.w/2,player.y+player.h/2,'#ffcc00',6);
+          }
         }
       });
     }
@@ -856,6 +1008,17 @@ document.addEventListener('DOMContentLoaded',function(){
     function updatePowerups(){
       powerups=powerups.filter(function(p){ return p.y<H+10; });
       powerups.forEach(function(p){
+        // Magnet attraction
+        if(upgrades.magnet>0){
+          var dx=player.x+player.w/2-p.x-p.w/2;
+          var dy=player.y+player.h/2-p.y-p.h/2;
+          var dist=Math.sqrt(dx*dx+dy*dy);
+          if(dist<120 && dist>1){
+            var attract=0.08;
+            p.x+=dx/dist*attract;
+            p.y+=dy/dist*attract;
+          }
+        }
         p.y+=p.vy;
         if(p.x<player.x+player.w&&p.x+p.w>player.x&&p.y<player.y+player.h&&p.y+p.h>player.y){
           p.hit=true;
@@ -880,33 +1043,52 @@ document.addEventListener('DOMContentLoaded',function(){
 
     function fireBullet(){
       if(shootCooldown>0) return;
-      var isRapid=(player.powerType==='rapid'||player.powerType2==='rapid');
-      var isSpread=(player.powerType==='spread'||player.powerType2==='spread');
-      if(isRapid && isSpread){
-        // Stacked: rapid fire spread shot
-        bullets.push({x:player.x+player.w/2-2,y:player.y-14,w:4,h:10,speed:8,vx:-1.5});
-        bullets.push({x:player.x+player.w/2-2,y:player.y-14,w:4,h:10,speed:8,vx:0});
-        bullets.push({x:player.x+player.w/2-2,y:player.y-14,w:4,h:10,speed:8,vx:1.5});
-        shootCooldown=5;
-      } else if(isSpread){
-        bullets.push({x:player.x+player.w/2-2,y:player.y-14,w:4,h:10,speed:7,vx:-1.5});
-        bullets.push({x:player.x+player.w/2-2,y:player.y-14,w:4,h:10,speed:7,vx:0});
-        bullets.push({x:player.x+player.w/2-2,y:player.y-14,w:4,h:10,speed:7,vx:1.5});
-        shootCooldown=12;
-      } else if(isRapid){
-        bullets.push({x:player.x+player.w/2-2,y:player.y-14,w:4,h:10,speed:8});
-        shootCooldown=5;
+      var isTempRapid=(player.powerType==='rapid'||player.powerType2==='rapid');
+      var isTempSpread=(player.powerType==='spread'||player.powerType2==='spread');
+      var permRapid=upgrades.rapid;
+      var permSpread=upgrades.spread;
+      // Calculate base cooldown from permanent rapid fire
+      var baseCooldown=Math.max(4,10-(permRapid*2));
+      if(isTempRapid) baseCooldown=Math.min(baseCooldown,5);
+      var bulletSpeed=player.bulletSpeed;
+      if(isTempRapid) bulletSpeed=Math.max(bulletSpeed,8);
+      var spreadCount=1+permSpread+(isTempSpread?1:0);
+      var newBullets=[];
+      if(spreadCount===1){
+        newBullets.push({x:player.x+player.w/2-2,y:player.y-14,w:4,h:10,speed:bulletSpeed});
       } else {
-        bullets.push({x:player.x+player.w/2-2,y:player.y-14,w:4,h:10,speed:7});
-        shootCooldown=10;
+        var startVx=-(spreadCount-1)*1.2;
+        for(var bi=0;bi<spreadCount;bi++){
+          newBullets.push({
+            x:player.x+player.w/2-2+(bi-(spreadCount-1)/2)*4,
+            y:player.y-14,
+            w:4,h:10,
+            speed:bulletSpeed,
+            vx:startVx+bi*2.4
+          });
+        }
       }
+      if(upgrades.piercing>0){
+        newBullets.forEach(function(b){ b.piercing=true; b._hitEnemies={}; });
+      }
+      bullets=bullets.concat(newBullets);
+      shootCooldown=baseCooldown;
       sfxShoot();
     }
 
     function updatePlayer(){
       if(keys.left&&player.x>8) player.x-=player.speed;
       if(keys.right&&player.x+player.w<W-8) player.x+=player.speed;
-      if(keys.shoot) fireBullet();
+      if(keys.shoot){
+        fireBullet();
+        autoFireTimer=0;
+      } else if(upgrades.autoFire>0){
+        autoFireTimer++;
+        if(autoFireTimer>=18){
+          autoFireTimer=0;
+          fireBullet();
+        }
+      }
       if(shootCooldown>0) shootCooldown-=1;
       if(player.invuln>0) player.invuln-=1;
       if(player.powerTimer>0){
@@ -944,15 +1126,13 @@ document.addEventListener('DOMContentLoaded',function(){
       updateParticles();
       updateFloatTexts();
       if(comboTimer>0){ comboTimer-=1; if(comboTimer<=0) combo=0; }
-      if(enemies.every(function(e){ return !e.alive; })){
+      if(!waitingForUpgrade && enemies.every(function(e){ return !e.alive; })){
         var waveBonus=50+level*10;
         score+=waveBonus;
         spawnFloatText(W/2,H/2,'WAVE CLEAR +'+waveBonus,'#ffd700');
         sfxWaveClear();
-        level+=1;
-        setStatus('Wave cleared! Level '+level);
-        spawnWave();
         setLabels();
+        showUpgradePicker();
       }
       if(shake>0) shake-=1;
       frame+=1;
