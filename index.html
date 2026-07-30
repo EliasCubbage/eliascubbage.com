@@ -16,7 +16,7 @@
   <meta name="twitter:card" content="summary" />
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230d9488'/%3E%3Ctext x='16' y='22' text-anchor='middle' font-family='Inter,system-ui,sans-serif' font-size='16' font-weight='700' fill='%23ffffff'%3EEC%3C/text%3E%3C/svg%3E" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <script>history.scrollRestoration='manual';</script>
+  <script>history.scrollRestoration='manual';window.scrollTo(0,0);</script>
   <link rel="stylesheet" href="styles-cubblitz.css?v=11">
 </head>
 <body>
@@ -286,7 +286,7 @@
         gate.removeAttribute('hidden');
         info.setAttribute('hidden', '');
         generateCaptcha();
-        if (inputEl) { inputEl.value = ''; inputEl.focus({preventScroll:true}); }
+        if (inputEl) { inputEl.value = ''; }
         if (errorEl) errorEl.setAttribute('hidden', '');
       }
 
