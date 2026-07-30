@@ -393,12 +393,15 @@ body{
   display:none;align-items:center;justify-content:center;
   border-radius:12px;
 }
-.upgrade-picker.open{display:flex}
+.upgrade-picker.open{display:flex;pointer-events:auto}
 .upgrade-picker-bg{
   position:absolute;inset:0;
   background:rgba(5,5,6,0.85);backdrop-filter:blur(6px);
   border-radius:12px;
+  pointer-events:none;
 }
+.upgrade-picker-inner{pointer-events:auto}
+.upgrade-card{cursor:pointer;pointer-events:auto}
 .upgrade-picker-inner{
   position:relative;z-index:1;
   text-align:center;padding:20px 16px;width:100%;
