@@ -195,6 +195,33 @@
               <button id="overlay-btn" class="btn primary" type="button">Start</button>
             </div>
           </div>
+          <div id="upgrade-picker" class="upgrade-picker">
+            <div class="upgrade-picker-bg"></div>
+            <div class="upgrade-picker-inner">
+              <h3 class="upgrade-picker-title">CHOOSE AN UPGRADE</h3>
+              <div class="upgrade-cards" id="upgrade-cards">
+                <div class="upgrade-card" data-upgrade-idx="0">
+                  <div class="upgrade-card-icon" id="uc-icon-0">⚡</div>
+                  <div class="upgrade-card-name" id="uc-name-0">Rapid Fire</div>
+                  <div class="upgrade-card-desc" id="uc-desc-0">Fire faster</div>
+                  <div class="upgrade-card-level" id="uc-level-0"></div>
+                </div>
+                <div class="upgrade-card" data-upgrade-idx="1">
+                  <div class="upgrade-card-icon" id="uc-icon-1">✦</div>
+                  <div class="upgrade-card-name" id="uc-name-1">Spread Shot</div>
+                  <div class="upgrade-card-desc" id="uc-desc-1">Extra bullets</div>
+                  <div class="upgrade-card-level" id="uc-level-1"></div>
+                </div>
+                <div class="upgrade-card" data-upgrade-idx="2">
+                  <div class="upgrade-card-icon" id="uc-icon-2">🛡</div>
+                  <div class="upgrade-card-name" id="uc-name-2">Shield</div>
+                  <div class="upgrade-card-desc" id="uc-desc-2">+1 shield HP</div>
+                  <div class="upgrade-card-level" id="uc-level-2"></div>
+                </div>
+              </div>
+              <p class="upgrade-picker-hint">Click a card to upgrade your ship</p>
+            </div>
+          </div>
         </div>
         <div class="game-controls">
           <button id="game-start" class="btn primary" type="button">Start</button>
@@ -215,33 +242,6 @@
             <li><span class="hs-place"></span><span class="hs-initials">---</span><span class="hs-score">0</span></li>
             <li><span class="hs-place"></span><span class="hs-initials">---</span><span class="hs-score">0</span></li>
           </ol>
-        </div>
-        <div id="upgrade-picker" class="upgrade-picker">
-          <div class="upgrade-picker-bg"></div>
-          <div class="upgrade-picker-inner">
-            <h3 class="upgrade-picker-title">CHOOSE AN UPGRADE</h3>
-            <div class="upgrade-cards" id="upgrade-cards">
-              <div class="upgrade-card" data-upgrade-idx="0">
-                <div class="upgrade-card-icon" id="uc-icon-0">⚡</div>
-                <div class="upgrade-card-name" id="uc-name-0">Rapid Fire</div>
-                <div class="upgrade-card-desc" id="uc-desc-0">Fire faster</div>
-                <div class="upgrade-card-level" id="uc-level-0"></div>
-              </div>
-              <div class="upgrade-card" data-upgrade-idx="1">
-                <div class="upgrade-card-icon" id="uc-icon-1">✦</div>
-                <div class="upgrade-card-name" id="uc-name-1">Spread Shot</div>
-                <div class="upgrade-card-desc" id="uc-desc-1">Extra bullets</div>
-                <div class="upgrade-card-level" id="uc-level-1"></div>
-              </div>
-              <div class="upgrade-card" data-upgrade-idx="2">
-                <div class="upgrade-card-icon" id="uc-icon-2">🛡</div>
-                <div class="upgrade-card-name" id="uc-name-2">Shield</div>
-                <div class="upgrade-card-desc" id="uc-desc-2">+1 shield HP</div>
-                <div class="upgrade-card-level" id="uc-level-2"></div>
-              </div>
-            </div>
-            <p class="upgrade-picker-hint">Click a card to upgrade your ship</p>
-          </div>
         </div>
         <div id="initials-overlay" class="initials-overlay" hidden>
           <div class="initials-dialog">
