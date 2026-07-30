@@ -174,7 +174,7 @@ document.addEventListener('DOMContentLoaded',function(){
       stars.push({x:Math.random()*W,y:Math.random()*H,r:Math.random()*1.5+0.5,s:Math.random()*0.6+0.1,tw:Math.random()*Math.PI*2});
     }
 
-    var frame=0,level=1,score=0,lives=3,gameOver=true,gameStarted=false,gamePaused=false,shootCooldown=0,shake=0,combo=0,comboTimer=0,playerExploding=false,playerExplodeTimer=0,autoFireTimer=0,waitingForUpgrade=false;
+    var frame=0,level=1,score=0,lives=3,gameOver=true,gameStarted=false,gamePaused=false,shootCooldown=0,shake=0,combo=0,comboTimer=0,playerExploding=false,playerExplodeTimer=0,autoFireTimer=0,waitingForUpgrade=false,selectedUpgradeIdx=0,visibleUpgradeCount=0;
     // formation and dive state (Galaga-style lockstep)
     var formationX=0, formationY=0, diveCountdown=0;
 
@@ -369,7 +369,28 @@ document.addEventListener('DOMContentLoaded',function(){
           card.style.display='none';
         }
       }
+      // Set initial selection to first visible card
+      selectedUpgradeIdx=0;
+      highlightUpgradeCard();
       upgradePickerEl.classList.add('open');
+    }
+
+    function highlightUpgradeCard(){
+      for(var hi=0;hi<upgradeCards.length;hi++){
+        if(hi===selectedUpgradeIdx){
+          upgradeCards[hi].classList.add('selected');
+        } else {
+          upgradeCards[hi].classList.remove('selected');
+        }
+      }
+    }
+
+    function getVisibleUpgradeCount(){
+      var count=0;
+      for(var vi=0;vi<upgradeCards.length;vi++){
+        if(upgradeCards[vi].style.display!=='none') count++;
+      }
+      return count;
     }
 
     function applyUpgrade(upgradeId){
@@ -1170,6 +1191,25 @@ document.addEventListener('DOMContentLoaded',function(){
 
     // ===== INPUT =====
     window.addEventListener('keydown',function(e){
+      // Upgrade picker keyboard navigation
+      if(waitingForUpgrade){
+        e.preventDefault();
+        var visCount=getVisibleUpgradeCount();
+        if(e.key==='ArrowLeft'||e.key==='a'||e.key==='A'){
+          selectedUpgradeIdx=(selectedUpgradeIdx-1+visCount)%visCount;
+          highlightUpgradeCard();
+        }
+        if(e.key==='ArrowRight'||e.key==='d'||e.key==='D'){
+          selectedUpgradeIdx=(selectedUpgradeIdx+1)%visCount;
+          highlightUpgradeCard();
+        }
+        if(e.key===' '||e.key==='Spacebar'||e.key==='Enter'){
+          var card=upgradeCards[selectedUpgradeIdx];
+          var upgradeId=card.getAttribute('data-upgrade-id');
+          if(upgradeId) applyUpgrade(upgradeId);
+        }
+        return;
+      }
       if(e.key==='ArrowLeft'||e.key==='a'||e.key==='A'){ keys.left=true; }
       if(e.key==='ArrowRight'||e.key==='d'||e.key==='D'){ keys.right=true; }
       if(e.key===' '||e.key==='Spacebar'){

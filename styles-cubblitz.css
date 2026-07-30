@@ -427,6 +427,14 @@ body{
   box-shadow:0 8px 24px -4px rgba(13,148,136,0.3),inset 0 0 30px rgba(13,148,136,0.05);
 }
 .upgrade-card:active{transform:translateY(-2px)}
+.upgrade-card.selected{
+  border-color:rgba(13,148,136,0.8);
+  box-shadow:0 8px 24px -4px rgba(13,148,136,0.5),inset 0 0 30px rgba(13,148,136,0.1);
+  transform:translateY(-6px);
+}
+.upgrade-card.selected .upgrade-card-icon{
+  filter:drop-shadow(0 0 12px rgba(13,148,136,0.6));
+}
 .upgrade-card-icon{
   font-size:2rem;line-height:1;margin:0 0 6px;
   filter:drop-shadow(0 0 8px rgba(255,255,255,0.2));
