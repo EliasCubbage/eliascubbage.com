@@ -286,7 +286,7 @@
         gate.removeAttribute('hidden');
         info.setAttribute('hidden', '');
         generateCaptcha();
-        if (inputEl) { inputEl.value = ''; inputEl.focus(); }
+        if (inputEl) { inputEl.value = ''; inputEl.focus({preventScroll:true}); }
         if (errorEl) errorEl.setAttribute('hidden', '');
       }
 
@@ -311,7 +311,7 @@
           } else {
             if (errorEl) errorEl.removeAttribute('hidden');
             generateCaptcha();
-            if (inputEl) { inputEl.value = ''; inputEl.focus(); }
+            if (inputEl) { inputEl.value = ''; inputEl.focus({preventScroll:true}); }
           }
         });
       }
