@@ -302,16 +302,12 @@ document.addEventListener('DOMContentLoaded',function(){
 
     // ===== PERMANENT UPGRADE SYSTEM =====
     var upgradeDefs=[
-      {id:'rapid',name:'Rapid Fire',desc:'Fire rate +',icon:'⚡',maxLevel:3},
-      {id:'spread',name:'Spread Shot',desc:'Extra bullets +',icon:'✦',maxLevel:3},
-      {id:'shield',name:'Shield',desc:'+1 shield HP',icon:'🛡',maxLevel:3},
-      {id:'speed',name:'Speed Boost',desc:'Move speed +',icon:'➤',maxLevel:3},
-      {id:'bigBullets',name:'Big Bullets',desc:'Damage +',icon:'◆',maxLevel:3},
-      {id:'extraLife',name:'Extra Life',desc:'+1 life',icon:'♥',maxLevel:1},
-      {id:'autoFire',name:'Auto-Fire',desc:'Auto-fire when idle',icon:'⟳',maxLevel:1},
-      {id:'piercing',name:'Piercing',desc:'Bullets pass through enemies',icon:'→',maxLevel:1},
-      {id:'magnet',name:'Magnet',desc:'Attract power-ups',icon:'🧲',maxLevel:1},
-      {id:'bulletSpeed',name:'Bullet Speed',desc:'Bullet speed +',icon:'↑',maxLevel:3}
+      {id:'rapid',name:'Rapid Fire',desc:'Fire rate +',icon:'⚡',maxLevel:2},
+      {id:'spread',name:'Spread Shot',desc:'Extra bullets +',icon:'✦',maxLevel:2},
+      {id:'shield',name:'Shield',desc:'+1 shield HP',icon:'🛡',maxLevel:2},
+      {id:'speed',name:'Speed Boost',desc:'Move speed +',icon:'➤',maxLevel:2},
+      {id:'bigBullets',name:'Big Bullets',desc:'Damage +',icon:'◆',maxLevel:2},
+      {id:'extraLife',name:'Extra Life',desc:'+1 life',icon:'♥',maxLevel:1}
     ];
     var upgrades={};
     function initUpgrades(){
@@ -415,15 +411,6 @@ document.addEventListener('DOMContentLoaded',function(){
         lives++;
         setLabels();
         spawnFloatText(W/2,H/2-20,'+1 LIFE','#ff6644');
-      } else if(upgradeId==='autoFire'){
-        spawnFloatText(W/2,H/2-20,'AUTO-FIRE','#44ffcc');
-      } else if(upgradeId==='piercing'){
-        spawnFloatText(W/2,H/2-20,'PIERCING','#ffd700');
-      } else if(upgradeId==='magnet'){
-        spawnFloatText(W/2,H/2-20,'MAGNET','#88ddff');
-      } else if(upgradeId==='bulletSpeed'){
-        player.bulletSpeed++;
-        spawnFloatText(W/2,H/2-20,'BULLET SPEED +','#88ff88');
       }
       upgradePickerEl.classList.remove('open');
       advanceAfterUpgrade();
@@ -459,7 +446,7 @@ document.addEventListener('DOMContentLoaded',function(){
 
     function spawnWave(){
       enemies=[];
-      var rows=2+Math.min(level,4);
+      var rows=2+Math.min(level,5);
       var cols=6;
       // More enemies per wave at higher levels
       if(level>3) cols=7;
@@ -494,9 +481,10 @@ document.addEventListener('DOMContentLoaded',function(){
         enemies.push({
           x:W/2-40,y:30,w:80,h:40,
           bodyColor:'hsl(0,80%,50%)',coreColor:'hsl(0,60%,30%)',shape:'boss',
-          alive:true,hp:20+level*2,maxHp:20+level*2,scoreVal:200+level*10,
+          alive:true,hp:35+level*3,maxHp:35+level*3,scoreVal:200+level*10,
           baseX:W/2-40,baseY:30,
-          phase:0,descending:false,hitFlash:0
+          phase:0,descending:false,hitFlash:0,
+          rocketCooldown:0
         });
       }
     }
@@ -527,7 +515,7 @@ document.addEventListener('DOMContentLoaded',function(){
       {type:'life',color:'hsl(15,90%,65%)',label:'+'}
     ];
     function maybeSpawnPowerup(x,y){
-      if(Math.random()<0.12){
+      if(Math.random()<0.08){
         var pt=powerTypes[Math.floor(Math.random()*powerTypes.length)];
         powerups.push({x:x,y:y,w:16,h:16,vy:1.2,type:pt.type,color:pt.color,label:pt.label,phase:0});
       }
@@ -539,12 +527,12 @@ document.addEventListener('DOMContentLoaded',function(){
           // Stack: both rapid and spread active
           player.powerType='rapid';
           player.powerType2='spread';
-          player.powerTimer=600;
-          player.powerTimer2=600;
+          player.powerTimer=420;
+          player.powerTimer2=420;
           spawnFloatText(player.x+player.w/2,player.y,'RAPID+SPREAD',p.color);
         } else {
           player.powerType='rapid';
-          player.powerTimer=600;
+          player.powerTimer=420;
           spawnFloatText(player.x+player.w/2,player.y,'RAPID FIRE',p.color);
         }
       }
@@ -553,12 +541,12 @@ document.addEventListener('DOMContentLoaded',function(){
           // Stack: both rapid and spread active
           player.powerType='rapid';
           player.powerType2='spread';
-          player.powerTimer=600;
-          player.powerTimer2=600;
+          player.powerTimer=420;
+          player.powerTimer2=420;
           spawnFloatText(player.x+player.w/2,player.y,'RAPID+SPREAD',p.color);
         } else {
           player.powerType='spread';
-          player.powerTimer=600;
+          player.powerTimer=420;
           spawnFloatText(player.x+player.w/2,player.y,'SPREAD SHOT',p.color);
         }
       }
@@ -743,10 +731,21 @@ document.addEventListener('DOMContentLoaded',function(){
     }
     function drawEnemyBullets(){
       enemyBullets.forEach(function(b){
-        ctx.fillStyle='#ff6644';
-        ctx.fillRect(b.x,b.y,b.w,b.h);
-        ctx.fillStyle='rgba(255,102,68,0.3)';
-        ctx.fillRect(b.x-1,b.y-8,b.w+2,8);
+        if(b.rocket){
+          // Draw rocket/missile with trail
+          ctx.fillStyle='#ff2222';
+          ctx.fillRect(b.x,b.y,b.w,b.h);
+          ctx.fillStyle='#ff6644';
+          ctx.fillRect(b.x+1,b.y+2,b.w-2,b.h-4);
+          // Trail
+          ctx.fillStyle='rgba(255,100,0,0.4)';
+          ctx.fillRect(b.x-2,b.y+b.h,b.w+4,6);
+        } else {
+          ctx.fillStyle='#ff6644';
+          ctx.fillRect(b.x,b.y,b.w,b.h);
+          ctx.fillStyle='rgba(255,102,68,0.3)';
+          ctx.fillRect(b.x-1,b.y-8,b.w+2,8);
+        }
       });
     }
     function drawParticles(){
@@ -860,12 +859,21 @@ document.addEventListener('DOMContentLoaded',function(){
             var t=frame*0.02+(e.phase||0);
             e.x=(e.baseX||W/2-40)+Math.sin(t*0.5)*80;
             e.y=(e.baseY||30)+Math.sin(t)*15;
-            // boss shoots more
-            if(shooterCount<maxShooters && Math.random()<0.015 && frame%60<15){
-              enemyBullets.push({x:e.x+e.w/2-2,y:e.y+e.h,w:4,h:8,speed:2+level*0.2,vx:0});
-              enemyBullets.push({x:e.x+e.w/2-2,y:e.y+e.h,w:4,h:8,speed:2+level*0.2,vx:-1});
-              enemyBullets.push({x:e.x+e.w/2-2,y:e.y+e.h,w:4,h:8,speed:2+level*0.2,vx:1});
-              shooterCount+=3;
+            // boss shoots homing rockets
+            if(e.rocketCooldown>0) e.rocketCooldown--;
+            if(shooterCount<maxShooters && e.rocketCooldown<=0 && Math.random()<0.02){
+              var rocketAngle=Math.atan2(player.y+player.h/2-(e.y+e.h/2), player.x+player.w/2-(e.x+e.w/2));
+              var rocketSpeed=3.5+level*0.25;
+              enemyBullets.push({
+                x:e.x+e.w/2-4, y:e.y+e.h,
+                w:8, h:12,
+                speed:rocketSpeed,
+                vx:Math.cos(rocketAngle)*rocketSpeed*0.3,
+                vy:Math.sin(rocketAngle)*rocketSpeed*0.3+rocketSpeed*0.7,
+                rocket:true
+              });
+              e.rocketCooldown=60+Math.floor(Math.random()*40);
+              shooterCount++;
             }
           }
           return;
@@ -891,9 +899,24 @@ document.addEventListener('DOMContentLoaded',function(){
           if(dist>5){
             e.x+=dx/dist*e.diveSpeed;
             e.y+=dy/dist*e.diveSpeed;
-            // Diving enemies shoot more
-            if(shooterCount<maxShooters && Math.random()<0.02){
-              enemyBullets.push({x:e.x+e.w/2-2,y:e.y+e.h,w:4,h:8,speed:2+level*0.2,vx:0});
+            // Diving enemies shoot more - mix of straight and homing
+            if(shooterCount<maxShooters && Math.random()<0.025){
+              if(Math.random()<0.4){
+                // Homing missile
+                var angle=Math.atan2(player.y+player.h/2-(e.y+e.h/2), player.x+player.w/2-(e.x+e.w/2));
+                var spd=2.5+level*0.15;
+                enemyBullets.push({
+                  x:e.x+e.w/2-2, y:e.y+e.h,
+                  w:4, h:8,
+                  speed:spd,
+                  vx:Math.cos(angle)*spd*0.4,
+                  vy:Math.sin(angle)*spd*0.4+spd*0.6,
+                  rocket:true
+                });
+              } else {
+                // Straight shot
+                enemyBullets.push({x:e.x+e.w/2-2,y:e.y+e.h,w:4,h:8,speed:2+level*0.2,vx:0});
+              }
               shooterCount++;
             }
           } else {
@@ -931,9 +954,23 @@ document.addEventListener('DOMContentLoaded',function(){
         e.x=e.gridX+formationX;
         e.y=e.gridY+formationY;
 
-        // More shooting from formation (50% more)
-        if(shooterCount<maxShooters && Math.random()<0.003 && frame%180<20){
-          enemyBullets.push({x:e.x+e.w/2-2,y:e.y+e.h,w:4,h:8,speed:2+level*0.2,vx:0});
+        // More shooting from formation (50% more) - mix of attacks
+        if(shooterCount<maxShooters && Math.random()<0.004 && frame%180<20){
+          if(Math.random()<0.35){
+            // Formation enemies fire homing missiles occasionally
+            var fAngle=Math.atan2(player.y+player.h/2-(e.y+e.h/2), player.x+player.w/2-(e.x+e.w/2));
+            var fSpd=2+level*0.15;
+            enemyBullets.push({
+              x:e.x+e.w/2-2, y:e.y+e.h,
+              w:4, h:8,
+              speed:fSpd,
+              vx:Math.cos(fAngle)*fSpd*0.3,
+              vy:Math.sin(fAngle)*fSpd*0.3+fSpd*0.7,
+              rocket:true
+            });
+          } else {
+            enemyBullets.push({x:e.x+e.w/2-2,y:e.y+e.h,w:4,h:8,speed:2+level*0.2,vx:0});
+          }
           shooterCount++;
         }
       });
@@ -996,7 +1033,26 @@ document.addEventListener('DOMContentLoaded',function(){
     function updateEnemyBullets(){
       enemyBullets=enemyBullets.filter(function(b){ return b.y<H+10 && (!b.vx || (b.x>-10 && b.x<W+10)); });
       enemyBullets.forEach(function(b){
-        b.y+=b.speed;
+        if(b.rocket && b.vx){
+          // Homing: curve toward player
+          var targetX=player.x+player.w/2;
+          var targetY=player.y+player.h/2;
+          var dx=targetX-b.x;
+          var dy=targetY-b.y;
+          var dist=Math.sqrt(dx*dx+dy*dy);
+          if(dist>1){
+            var homingStrength=0.03;
+            b.vx+=dx/dist*homingStrength;
+            b.vy+=dy/dist*homingStrength;
+            // Normalize and maintain speed
+            var mag=Math.sqrt(b.vx*b.vx+b.vy*b.vy);
+            if(mag>b.speed){
+              b.vx=b.vx/mag*b.speed;
+              b.vy=b.vy/mag*b.speed;
+            }
+          }
+        }
+        b.y+=b.vy||b.speed;
         if(b.vx) b.x+=b.vx;
       });
       enemyBullets.forEach(function(b){
