@@ -174,7 +174,7 @@ document.addEventListener('DOMContentLoaded',function(){
       stars.push({x:Math.random()*W,y:Math.random()*H,r:Math.random()*1.5+0.5,s:Math.random()*0.6+0.1,tw:Math.random()*Math.PI*2});
     }
 
-    var frame=0,level=1,score=0,lives=3,gameOver=true,gameStarted=false,gamePaused=false,shootCooldown=0,shake=0,combo=0,comboTimer=0,playerExploding=false,playerExplodeTimer=0,autoFireTimer=0,waitingForUpgrade=false,selectedUpgradeIdx=0,visibleUpgradeCount=0;
+    var frame=0,level=1,score=0,lives=2,gameOver=true,gameStarted=false,gamePaused=false,shootCooldown=0,shake=0,combo=0,comboTimer=0,playerExploding=false,playerExplodeTimer=0,autoFireTimer=0,waitingForUpgrade=false,selectedUpgradeIdx=0,visibleUpgradeCount=0;
     // formation and dive state (Galaga-style lockstep)
     var formationX=0, formationY=0, diveCountdown=0;
 
@@ -571,7 +571,7 @@ document.addEventListener('DOMContentLoaded',function(){
       initAudio();
       player.x=W/2-18; player.invuln=0; player.powerType=null; player.powerTimer=0; player.powerType2=null; player.powerTimer2=0; player.shieldHP=0; player.bulletDamage=1; player.bulletSpeed=7;
       bullets=[]; enemyBullets=[]; particles=[]; powerups=[]; floatTexts=[];
-      frame=0; level=1; score=0; lives=3; combo=0; comboTimer=0; autoFireTimer=0; waitingForUpgrade=false;
+      frame=0; level=1; score=0; lives=2; combo=0; comboTimer=0; autoFireTimer=0; waitingForUpgrade=false;
       gameOver=false; gameStarted=true; gamePaused=false; shootCooldown=0; shake=0; playerExploding=false; playerExplodeTimer=0;
       initUpgrades(); spawnWave(); setLabels(); setStatus('Use arrows and Space to shoot.');
       hideOverlay(); upgradePickerEl.classList.remove('open');
