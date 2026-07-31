@@ -302,11 +302,11 @@ document.addEventListener('DOMContentLoaded',function(){
 
     // ===== PERMANENT UPGRADE SYSTEM =====
     var upgradeDefs=[
-      {id:'rapid',name:'Rapid Fire',desc:'Fire rate +',icon:'⚡',maxLevel:2},
-      {id:'spread',name:'Spread Shot',desc:'Extra bullets +',icon:'✦',maxLevel:2},
-      {id:'shield',name:'Shield',desc:'+1 shield HP',icon:'🛡',maxLevel:2},
-      {id:'speed',name:'Speed Boost',desc:'Move speed +',icon:'➤',maxLevel:2},
-      {id:'bigBullets',name:'Big Bullets',desc:'Damage +',icon:'◆',maxLevel:2},
+      {id:'rapid',name:'Rapid Fire',desc:'Fire rate +',icon:'⚡',maxLevel:1},
+      {id:'spread',name:'Spread Shot',desc:'Extra bullets +',icon:'✦',maxLevel:1},
+      {id:'shield',name:'Shield',desc:'+1 shield HP',icon:'🛡',maxLevel:1},
+      {id:'speed',name:'Speed Boost',desc:'Move speed +',icon:'➤',maxLevel:1},
+      {id:'bigBullets',name:'Big Bullets',desc:'Damage +',icon:'◆',maxLevel:1},
       {id:'extraLife',name:'Extra Life',desc:'+1 life',icon:'♥',maxLevel:1}
     ];
     var upgrades={};
@@ -1124,11 +1124,12 @@ document.addEventListener('DOMContentLoaded',function(){
       var isTempSpread=(player.powerType==='spread'||player.powerType2==='spread');
       var permRapid=upgrades.rapid;
       var permSpread=upgrades.spread;
-      // Calculate base cooldown from permanent rapid fire
-      var baseCooldown=Math.max(4,10-(permRapid*2));
-      if(isTempRapid) baseCooldown=Math.min(baseCooldown,5);
+      // Calculate base cooldown from permanent rapid fire - slower base fire rate
+      var baseCooldown=Math.max(8,16-(permRapid*4));
+      if(isTempRapid) baseCooldown=Math.min(baseCooldown,10);
       var bulletSpeed=player.bulletSpeed;
       if(isTempRapid) bulletSpeed=Math.max(bulletSpeed,8);
+      // Fewer bullets: spread only adds 1 bullet max, temp spread adds 1
       var spreadCount=1+permSpread+(isTempSpread?1:0);
       var newBullets=[];
       if(spreadCount===1){
@@ -1209,7 +1210,16 @@ document.addEventListener('DOMContentLoaded',function(){
         spawnFloatText(W/2,H/2,'WAVE CLEAR +'+waveBonus,'#ffd700');
         sfxWaveClear();
         setLabels();
-        showUpgradePicker();
+        // Only offer upgrades every 3 waves to slow progression
+        if(level%3===0){
+          showUpgradePicker();
+        } else {
+          // Skip upgrade, advance directly
+          level+=1;
+          spawnWave();
+          setLabels();
+          setStatus('Wave cleared! Level '+level);
+        }
       }
       if(shake>0) shake-=1;
       frame+=1;
