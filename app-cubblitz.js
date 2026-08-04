@@ -174,9 +174,13 @@ document.addEventListener('DOMContentLoaded',function(){
       stars.push({x:Math.random()*W,y:Math.random()*H,r:Math.random()*1.5+0.5,s:Math.random()*0.6+0.1,tw:Math.random()*Math.PI*2});
     }
 
-    var frame=0,level=1,score=0,lives=2,gameOver=true,gameStarted=false,gamePaused=false,shootCooldown=0,shake=0,combo=0,comboTimer=0,playerExploding=false,playerExplodeTimer=0,autoFireTimer=0,waitingForUpgrade=false,selectedUpgradeIdx=0,visibleUpgradeCount=0;
+    var frame=0,level=1,score=0,lives=2,gameOver=true,gameStarted=false,gamePaused=false,shootCooldown=0,shake=0,combo=0,comboTimer=0,playerExploding=false,playerExplodeTimer=0,waitingForUpgrade=false,selectedUpgradeIdx=0,visibleUpgradeCount=0;
+    // Enemy shoot probability multiplier (0.7 = enemies shoot 30% less)
+    var enemyShootMult=0.7;
     // formation and dive state (Galaga-style lockstep)
     var formationX=0, formationY=0, diveCountdown=0;
+
+
 
     // ===== AUDIO (Web Audio API) =====
     var audioCtx=null,muted=false;
@@ -302,12 +306,15 @@ document.addEventListener('DOMContentLoaded',function(){
 
     // ===== PERMANENT UPGRADE SYSTEM =====
     var upgradeDefs=[
-      {id:'rapid',name:'Rapid Fire',desc:'Fire rate +',icon:'⚡',maxLevel:1},
-      {id:'spread',name:'Spread Shot',desc:'Extra bullets +',icon:'✦',maxLevel:1},
-      {id:'shield',name:'Shield',desc:'+1 shield HP',icon:'🛡',maxLevel:1},
-      {id:'speed',name:'Speed Boost',desc:'Move speed +',icon:'➤',maxLevel:1},
-      {id:'bigBullets',name:'Big Bullets',desc:'Damage +',icon:'◆',maxLevel:1},
-      {id:'extraLife',name:'Extra Life',desc:'+1 life',icon:'♥',maxLevel:1}
+      {id:'rapid',name:'Rapid Fire',desc:'Fire rate +',icon:'⚡',maxLevel:3},
+      {id:'spread',name:'Spread Shot',desc:'Extra bullets +',icon:'✦',maxLevel:2},
+      {id:'shield',name:'Shield',desc:'+1 shield HP',icon:'🛡',maxLevel:3},
+      {id:'speed',name:'Speed Boost',desc:'Move speed +',icon:'➤',maxLevel:3},
+      {id:'bigBullets',name:'Big Bullets',desc:'Damage +',icon:'◆',maxLevel:3},
+      {id:'extraLife',name:'Extra Life',desc:'+1 life',icon:'♥',maxLevel:3},
+      {id:'magnet',name:'Magnet',desc:'Attract powerups',icon:'🧲',maxLevel:2},
+      {id:'piercing',name:'Piercing Rounds',desc:'Bullets pierce enemies',icon:'➹',maxLevel:1},
+      {id:'homing',name:'Homing Shots',desc:'Bullets home in on enemies',icon:'🎯',maxLevel:1}
     ];
     var upgrades={};
     function initUpgrades(){
@@ -411,6 +418,12 @@ document.addEventListener('DOMContentLoaded',function(){
         lives++;
         setLabels();
         spawnFloatText(W/2,H/2-20,'+1 LIFE','#ff6644');
+      } else if(upgradeId==='magnet'){
+        spawnFloatText(W/2,H/2-20,'MAGNET +','#dd44ff');
+      } else if(upgradeId==='piercing'){
+        spawnFloatText(W/2,H/2-20,'PIERCING +','#44ffdd');
+      } else if(upgradeId==='homing'){
+        spawnFloatText(W/2,H/2-20,'HOMING SHOTS +','#66ccff');
       }
       upgradePickerEl.classList.remove('open');
       advanceAfterUpgrade();
@@ -559,7 +572,7 @@ document.addEventListener('DOMContentLoaded',function(){
       initAudio();
       player.x=W/2-18; player.invuln=0; player.powerType=null; player.powerTimer=0; player.powerType2=null; player.powerTimer2=0; player.shieldHP=0; player.bulletDamage=1; player.bulletSpeed=7;
       bullets=[]; enemyBullets=[]; particles=[]; powerups=[]; floatTexts=[];
-      frame=0; level=1; score=0; lives=2; combo=0; comboTimer=0; autoFireTimer=0; waitingForUpgrade=false;
+      frame=0; level=1; score=0; lives=2; combo=0; comboTimer=0; waitingForUpgrade=false;
       gameOver=false; gameStarted=true; gamePaused=false; shootCooldown=0; shake=0; playerExploding=false; playerExplodeTimer=0;
       initUpgrades(); spawnWave(); setLabels(); setStatus('Use arrows and Space to shoot.');
       hideOverlay(); upgradePickerEl.classList.remove('open');
@@ -861,8 +874,9 @@ document.addEventListener('DOMContentLoaded',function(){
             e.y=(e.baseY||30)+Math.sin(t)*15;
             // boss shoots homing rockets
             if(e.rocketCooldown>0) e.rocketCooldown--;
-            if(shooterCount<maxShooters && e.rocketCooldown<=0 && Math.random()<0.02){
+            if(shooterCount<maxShooters && e.rocketCooldown<=0 && Math.random()<0.02*enemyShootMult){
               var rocketAngle=Math.atan2(player.y+player.h/2-(e.y+e.h/2), player.x+player.w/2-(e.x+e.w/2));
+
               var rocketSpeed=3.5+level*0.25;
               enemyBullets.push({
                 x:e.x+e.w/2-4, y:e.y+e.h,
@@ -900,9 +914,10 @@ document.addEventListener('DOMContentLoaded',function(){
             e.x+=dx/dist*e.diveSpeed;
             e.y+=dy/dist*e.diveSpeed;
             // Diving enemies shoot more - mix of straight and homing
-            if(shooterCount<maxShooters && Math.random()<0.025){
+            if(shooterCount<maxShooters && Math.random()<0.025*enemyShootMult){
               if(Math.random()<0.4){
                 // Homing missile
+
                 var angle=Math.atan2(player.y+player.h/2-(e.y+e.h/2), player.x+player.w/2-(e.x+e.w/2));
                 var spd=2.5+level*0.15;
                 enemyBullets.push({
@@ -955,9 +970,10 @@ document.addEventListener('DOMContentLoaded',function(){
         e.y=e.gridY+formationY;
 
         // More shooting from formation (50% more) - mix of attacks
-        if(shooterCount<maxShooters && Math.random()<0.004 && frame%180<20){
+        if(shooterCount<maxShooters && Math.random()<0.004*enemyShootMult && frame%180<20){
           if(Math.random()<0.35){
             // Formation enemies fire homing missiles occasionally
+
             var fAngle=Math.atan2(player.y+player.h/2-(e.y+e.h/2), player.x+player.w/2-(e.x+e.w/2));
             var fSpd=2+level*0.15;
             enemyBullets.push({
@@ -979,6 +995,32 @@ document.addEventListener('DOMContentLoaded',function(){
     function updateBullets(){
       bullets=bullets.filter(function(b){ return b.y>-10; });
       bullets.forEach(function(b){ b.y-=b.speed; });
+      // Homing shots: curve toward nearest enemy
+      if(upgrades.homing>0){
+        bullets.forEach(function(b){
+          if(b.homing){
+            var nearest=null,nearestDist=999999;
+            enemies.forEach(function(e){
+              if(e.alive){
+                var ex=e.x+e.w/2,ey=e.y+e.h/2,bx=b.x+b.w/2,by=b.y+b.h/2;
+                var dist=Math.sqrt((ex-bx)*(ex-bx)+(ey-by)*(ey-by));
+                if(dist<nearestDist){ nearestDist=dist; nearest=e; }
+              }
+            });
+            if(nearest&&nearestDist<200){
+              var dx=(nearest.x+nearest.w/2)-(b.x+b.w/2);
+              var dy=(nearest.y+nearest.h/2)-(b.y+b.h/2);
+              var d=Math.sqrt(dx*dx+dy*dy);
+              if(d>1){
+                b.vx=(b.vx||0)+(dx/d*0.3);
+                var maxVx=b.speed*0.6;
+                if(b.vx>maxVx) b.vx=maxVx;
+                if(b.vx<-maxVx) b.vx=-maxVx;
+              }
+            }
+          }
+        });
+      }
       bullets.forEach(function(b){
         if(b.hit) return;
         enemies.forEach(function(e){
@@ -1085,18 +1127,21 @@ document.addEventListener('DOMContentLoaded',function(){
     function updatePowerups(){
       powerups=powerups.filter(function(p){ return p.y<H+10; });
       powerups.forEach(function(p){
-        // Magnet attraction
+        // Magnet attraction - stronger pull that scales with upgrade level
         if(upgrades.magnet>0){
           var dx=player.x+player.w/2-p.x-p.w/2;
           var dy=player.y+player.h/2-p.y-p.h/2;
           var dist=Math.sqrt(dx*dx+dy*dy);
-          if(dist<120 && dist>1){
-            var attract=0.08;
+          var magnetRadius=120+upgrades.magnet*50;
+          if(dist<magnetRadius && dist>1){
+            var attract=0.12+upgrades.magnet*0.08;
             p.x+=dx/dist*attract;
             p.y+=dy/dist*attract;
           }
         }
+
         p.y+=p.vy;
+
         if(p.x<player.x+player.w&&p.x+p.w>player.x&&p.y<player.y+player.h&&p.y+p.h>player.y){
           p.hit=true;
           applyPowerup(p);
@@ -1149,6 +1194,9 @@ document.addEventListener('DOMContentLoaded',function(){
       if(upgrades.piercing>0){
         newBullets.forEach(function(b){ b.piercing=true; b._hitEnemies={}; });
       }
+      if(upgrades.homing>0){
+        newBullets.forEach(function(b){ b.homing=true; });
+      }
       bullets=bullets.concat(newBullets);
       shootCooldown=baseCooldown;
       sfxShoot();
@@ -1157,16 +1205,7 @@ document.addEventListener('DOMContentLoaded',function(){
     function updatePlayer(){
       if(keys.left&&player.x>8) player.x-=player.speed;
       if(keys.right&&player.x+player.w<W-8) player.x+=player.speed;
-      if(keys.shoot){
-        fireBullet();
-        autoFireTimer=0;
-      } else if(upgrades.autoFire>0){
-        autoFireTimer++;
-        if(autoFireTimer>=18){
-          autoFireTimer=0;
-          fireBullet();
-        }
-      }
+      if(keys.shoot){ fireBullet(); }
       if(shootCooldown>0) shootCooldown-=1;
       if(player.invuln>0) player.invuln-=1;
       if(player.powerTimer>0){
@@ -1210,16 +1249,8 @@ document.addEventListener('DOMContentLoaded',function(){
         spawnFloatText(W/2,H/2,'WAVE CLEAR +'+waveBonus,'#ffd700');
         sfxWaveClear();
         setLabels();
-        // Only offer upgrades every 3 waves to slow progression
-        if(level%3===0){
-          showUpgradePicker();
-        } else {
-          // Skip upgrade, advance directly
-          level+=1;
-          spawnWave();
-          setLabels();
-          setStatus('Wave cleared! Level '+level);
-        }
+        // Offer an upgrade every wave
+        showUpgradePicker();
       }
       if(shake>0) shake-=1;
       frame+=1;
