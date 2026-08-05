@@ -528,6 +528,7 @@ document.addEventListener('DOMContentLoaded',function(){
       {type:'life',color:'hsl(15,90%,65%)',label:'+'}
     ];
     function maybeSpawnPowerup(x,y){
+      if(powerups.length>=5) return;
       if(Math.random()<0.08){
         var pt=powerTypes[Math.floor(Math.random()*powerTypes.length)];
         powerups.push({x:x,y:y,w:16,h:16,vy:1.2,type:pt.type,color:pt.color,label:pt.label,phase:0});
@@ -913,25 +914,9 @@ document.addEventListener('DOMContentLoaded',function(){
           if(dist>5){
             e.x+=dx/dist*e.diveSpeed;
             e.y+=dy/dist*e.diveSpeed;
-            // Diving enemies shoot more - mix of straight and homing
+            // Diving enemies shoot straight shots only (no homing missiles)
             if(shooterCount<maxShooters && Math.random()<0.025*enemyShootMult){
-              if(Math.random()<0.4){
-                // Homing missile
-
-                var angle=Math.atan2(player.y+player.h/2-(e.y+e.h/2), player.x+player.w/2-(e.x+e.w/2));
-                var spd=2.5+level*0.15;
-                enemyBullets.push({
-                  x:e.x+e.w/2-2, y:e.y+e.h,
-                  w:4, h:8,
-                  speed:spd,
-                  vx:Math.cos(angle)*spd*0.4,
-                  vy:Math.sin(angle)*spd*0.4+spd*0.6,
-                  rocket:true
-                });
-              } else {
-                // Straight shot
-                enemyBullets.push({x:e.x+e.w/2-2,y:e.y+e.h,w:4,h:8,speed:2+level*0.2,vx:0});
-              }
+              enemyBullets.push({x:e.x+e.w/2-2,y:e.y+e.h,w:4,h:8,speed:2+level*0.2,vx:0});
               shooterCount++;
             }
           } else {
@@ -969,24 +954,9 @@ document.addEventListener('DOMContentLoaded',function(){
         e.x=e.gridX+formationX;
         e.y=e.gridY+formationY;
 
-        // More shooting from formation (50% more) - mix of attacks
+        // Formation enemies shoot straight shots only (no homing missiles)
         if(shooterCount<maxShooters && Math.random()<0.004*enemyShootMult && frame%180<20){
-          if(Math.random()<0.35){
-            // Formation enemies fire homing missiles occasionally
-
-            var fAngle=Math.atan2(player.y+player.h/2-(e.y+e.h/2), player.x+player.w/2-(e.x+e.w/2));
-            var fSpd=2+level*0.15;
-            enemyBullets.push({
-              x:e.x+e.w/2-2, y:e.y+e.h,
-              w:4, h:8,
-              speed:fSpd,
-              vx:Math.cos(fAngle)*fSpd*0.3,
-              vy:Math.sin(fAngle)*fSpd*0.3+fSpd*0.7,
-              rocket:true
-            });
-          } else {
-            enemyBullets.push({x:e.x+e.w/2-2,y:e.y+e.h,w:4,h:8,speed:2+level*0.2,vx:0});
-          }
+          enemyBullets.push({x:e.x+e.w/2-2,y:e.y+e.h,w:4,h:8,speed:2+level*0.2,vx:0});
           shooterCount++;
         }
       });
@@ -1249,8 +1219,12 @@ document.addEventListener('DOMContentLoaded',function(){
         spawnFloatText(W/2,H/2,'WAVE CLEAR +'+waveBonus,'#ffd700');
         sfxWaveClear();
         setLabels();
-        // Offer an upgrade every wave
-        showUpgradePicker();
+        // Only show upgrade picker when defeating a boss
+        if(level%5===0){
+          showUpgradePicker();
+        } else {
+          advanceAfterUpgrade();
+        }
       }
       if(shake>0) shake-=1;
       frame+=1;
