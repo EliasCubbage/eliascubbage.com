@@ -809,10 +809,10 @@ document.addEventListener('DOMContentLoaded',function(){
             var diver=shuffled[di];
             if(!diver) break;
             diver.diving=true;
-            // Squad target - spread across player area
-            diver.diveTargetX=player.x+player.w/2+(Math.random()-0.5)*80;
-            diver.diveTargetY=player.y+player.h/2+30+(Math.random()-0.5)*40;
+            // Fixed straight-line dive - slight angle based on column
             diver.diveSpeed=2.5+Math.random()*1.5;
+            diver.diveVX=(diver.gridX-W/2)/W*1.5;
+            diver.diveVY=diver.diveSpeed;
           }
           // Shorter delay between dive waves (come down twice as much)
           diveCountdown=120+Math.floor(Math.random()*60);
@@ -831,7 +831,7 @@ document.addEventListener('DOMContentLoaded',function(){
         if(!e.alive) continue;
 
         // If enemy crossed below the bottom, teleport it back to the top
-        // and keep diving toward the player (top-to-bottom loop)
+        // and keep diving in the same straight line (top-to-bottom loop)
         if(e.y > H){
           e.y=-e.h-10;
           e.diving=true;
@@ -878,15 +878,10 @@ document.addEventListener('DOMContentLoaded',function(){
           continue;
         }
 
-        // Diving - continuously home toward the player
+        // Diving - move in a fixed straight line
         if(e.diving){
-          var dx=player.x+player.w/2-e.x;
-          var dy=player.y+player.h/2-e.y;
-          var dist=Math.sqrt(dx*dx+dy*dy);
-          if(dist>1){
-            e.x+=dx/dist*e.diveSpeed;
-            e.y+=dy/dist*e.diveSpeed;
-          }
+          e.x+=e.diveVX||0;
+          e.y+=e.diveVY||e.diveSpeed;
           // Diving enemies shoot straight shots only (no homing missiles)
           if(shooterCount<maxShooters && Math.random()<0.025*enemyShootMult){
             enemyBullets.push({x:e.x+e.w/2-2,y:e.y+e.h,w:4,h:8,speed:2+level*0.2,vx:0});
