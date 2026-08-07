@@ -811,8 +811,11 @@ document.addEventListener('DOMContentLoaded',function(){
             diver.diving=true;
             // Fixed straight-line dive - slight angle based on column
             diver.diveSpeed=2.5+Math.random()*1.5;
-            diver.diveVX=(diver.gridX-W/2)/W*1.5;
+            diver.diveVX=(diver.gridX-W/2)/W*1.0;
             diver.diveVY=diver.diveSpeed;
+            // Track how many bottom-to-top wraps this enemy can do
+            diver.wrapCount=0;
+            diver.loopsLeft=1+Math.floor(Math.random()*2);
           }
           // Shorter delay between dive waves (come down twice as much)
           diveCountdown=120+Math.floor(Math.random()*60);
@@ -831,12 +834,20 @@ document.addEventListener('DOMContentLoaded',function(){
         if(!e.alive) continue;
 
         // If enemy crossed below the bottom, teleport it back to the top
-        // and keep diving in the same straight line (top-to-bottom loop)
         if(e.y > H){
-          e.y=-e.h-10;
-          e.diving=true;
-          e.returning=false;
-          e.returnTimer=0;
+          if(e.diving && e.wrapCount < e.loopsLeft){
+            // Keep diving - teleport to top with a fresh line angle
+            e.y=-e.h-10;
+            e.wrapCount++;
+            e.diveVX=(Math.random()-0.5)*1.0;
+            e.diveVY=e.diveSpeed;
+          } else {
+            // Loop limit reached - teleport to top and return to formation
+            e.y=-e.h-10;
+            e.diving=false;
+            e.returning=true;
+            e.returnTimer=0;
+          }
         }
 
         // ===== BOSS =====
@@ -882,6 +893,9 @@ document.addEventListener('DOMContentLoaded',function(){
         if(e.diving){
           e.x+=e.diveVX||0;
           e.y+=e.diveVY||e.diveSpeed;
+          // Keep enemy within horizontal bounds so it can always be shot
+          if(e.x<0) e.x=0;
+          if(e.x+e.w>W) e.x=W-e.w;
           // Diving enemies shoot straight shots only (no homing missiles)
           if(shooterCount<maxShooters && Math.random()<0.025*enemyShootMult){
             enemyBullets.push({x:e.x+e.w/2-2,y:e.y+e.h,w:4,h:8,speed:2+level*0.2,vx:0});
