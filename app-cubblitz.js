@@ -830,17 +830,13 @@ document.addEventListener('DOMContentLoaded',function(){
         var e=enemies[ei2];
         if(!e.alive) continue;
 
-        // If enemy crossed below the bottom, wrap it back to the top
-        // and keep diving down (top-to-bottom loop)
+        // If enemy crossed below the bottom, teleport it back to the top
+        // and keep diving toward the player (top-to-bottom loop)
         if(e.y > H){
           e.y=-e.h-10;
           e.diving=true;
           e.returning=false;
           e.returnTimer=0;
-          // Reset dive target for another pass down the screen
-          e.diveTargetX=player.x+player.w/2+(Math.random()-0.5)*80;
-          e.diveTargetY=H+50;
-          e.diveSpeed=2.5+Math.random()*1.5;
         }
 
         // ===== BOSS =====
@@ -882,24 +878,19 @@ document.addEventListener('DOMContentLoaded',function(){
           continue;
         }
 
-        // Diving toward player position
+        // Diving - continuously home toward the player
         if(e.diving){
-          var dx=e.diveTargetX-e.x;
-          var dy=e.diveTargetY-e.y;
+          var dx=player.x+player.w/2-e.x;
+          var dy=player.y+player.h/2-e.y;
           var dist=Math.sqrt(dx*dx+dy*dy);
-          if(dist>5){
+          if(dist>1){
             e.x+=dx/dist*e.diveSpeed;
             e.y+=dy/dist*e.diveSpeed;
-            // Diving enemies shoot straight shots only (no homing missiles)
-            if(shooterCount<maxShooters && Math.random()<0.025*enemyShootMult){
-              enemyBullets.push({x:e.x+e.w/2-2,y:e.y+e.h,w:4,h:8,speed:2+level*0.2,vx:0});
-              shooterCount++;
-            }
-          } else {
-            // Reached target, return to formation
-            e.diving=false;
-            e.returning=true;
-            e.returnTimer=30;
+          }
+          // Diving enemies shoot straight shots only (no homing missiles)
+          if(shooterCount<maxShooters && Math.random()<0.025*enemyShootMult){
+            enemyBullets.push({x:e.x+e.w/2-2,y:e.y+e.h,w:4,h:8,speed:2+level*0.2,vx:0});
+            shooterCount++;
           }
           continue;
         }
