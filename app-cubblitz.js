@@ -813,9 +813,6 @@ document.addEventListener('DOMContentLoaded',function(){
             diver.diveSpeed=2.5+Math.random()*1.5;
             diver.diveVX=(diver.gridX-W/2)/W*1.0;
             diver.diveVY=diver.diveSpeed;
-            // Track how many bottom-to-top wraps this enemy can do
-            diver.wrapCount=0;
-            diver.loopsLeft=1+Math.floor(Math.random()*2);
           }
           // Shorter delay between dive waves (come down twice as much)
           diveCountdown=120+Math.floor(Math.random()*60);
@@ -834,20 +831,12 @@ document.addEventListener('DOMContentLoaded',function(){
         if(!e.alive) continue;
 
         // If enemy crossed below the bottom, teleport it back to the top
+        // and return to formation (single pass - no repeated looping)
         if(e.y > H){
-          if(e.diving && e.wrapCount < e.loopsLeft){
-            // Keep diving - teleport to top with a fresh line angle
-            e.y=-e.h-10;
-            e.wrapCount++;
-            e.diveVX=(Math.random()-0.5)*1.0;
-            e.diveVY=e.diveSpeed;
-          } else {
-            // Loop limit reached - teleport to top and return to formation
-            e.y=-e.h-10;
-            e.diving=false;
-            e.returning=true;
-            e.returnTimer=0;
-          }
+          e.y=-e.h-10;
+          e.diving=false;
+          e.returning=true;
+          e.returnTimer=0;
         }
 
         // ===== BOSS =====
