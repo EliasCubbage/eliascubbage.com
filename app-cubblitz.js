@@ -830,13 +830,17 @@ document.addEventListener('DOMContentLoaded',function(){
         var e=enemies[ei2];
         if(!e.alive) continue;
 
-        // If enemy crossed below the bottom, reappear at the top
-        // and fly back to formation
+        // If enemy crossed below the bottom, wrap it back to the top
+        // and keep diving down (top-to-bottom loop)
         if(e.y > H){
           e.y=-e.h-10;
-          e.diving=false;
-          e.returning=true;
+          e.diving=true;
+          e.returning=false;
           e.returnTimer=0;
+          // Reset dive target for another pass down the screen
+          e.diveTargetX=player.x+player.w/2+(Math.random()-0.5)*80;
+          e.diveTargetY=H+50;
+          e.diveSpeed=2.5+Math.random()*1.5;
         }
 
         // ===== BOSS =====
