@@ -1,25 +1,26 @@
 /**
- * Traffic Analytics – Google Analytics 4 (GDPR-compliant)
+ * Traffic Analytics — Consent Banner for Google Analytics 4
  *
- * This module:
- *   1. Displays a lightweight cookie-consent banner.
- *   2. Only loads GA4 after the visitor accepts (or respects
- *      consent is "denied" by default for GDPR/CCPA safety).
- *   3. Reads the Measurement ID from window.CUBBLITZ_CONFIG.gaMeasurementId
- *      (set in config.js).
+ * The GA4 library (gtag.js) and the default consent policy are initialized
+ * in the <head> of index.html using Google Consent Mode. This file handles
+ * the UI: it shows a cookie-consent banner and, on acceptance, calls
+ * gtag('consent', 'update', ...) to flip analytics_storage to "granted".
+ *
+ * Behaviour:
+ *   - If no Measurement ID is set in config.js → nothing happens.
+ *   - If the visitor already accepted → skip banner, call consent update.
+ *   - Otherwise → show banner. Accept → grant consent. Decline → no tracking.
  */
 (function () {
   'use strict';
 
-  // --- Config ---------------------------------------------------------------
+  // Only run if GA4 is configured
   var GA_MEASUREMENT_ID = '';
   if (window.CUBBLITZ_CONFIG && window.CUBBLITZ_CONFIG.gaMeasurementId) {
     GA_MEASUREMENT_ID = window.CUBBLITZ_CONFIG.gaMeasurementId;
   }
-
-  // If no Measurement ID was provided, skip everything.
   if (!GA_MEASUREMENT_ID) {
-    return;
+    return; // no GA4 configured, nothing to do
   }
 
   var CONSENT_KEY = 'ga_consent_given';
@@ -32,10 +33,24 @@
       return false;
     }
   }
+
   function setConsent(val) {
     try {
       localStorage.setItem(CONSENT_KEY, val ? 'true' : 'false');
     } catch (e) {}
+  }
+
+  // Grant analytics consent via Google Consent Mode
+  function grantConsent() {
+    if (typeof gtag === 'function') {
+      gtag('consent', 'update', {
+        analytics_storage: 'granted',
+        ad_storage: 'granted',
+        functionality_storage: 'granted',
+        personalization_storage: 'granted',
+        security_storage: 'granted',
+      });
+    }
   }
 
   // --- Consent Banner -------------------------------------------------------
@@ -61,6 +76,8 @@
       'z-index:9999',
       'box-shadow:0 -2px 20px rgba(0,0,0,0.3)',
     ].join(';');
+    bar.style.opacity = '0';
+    bar.style.transition = 'opacity 0.3s';
 
     var msg = document.createElement('span');
     msg.textContent =
@@ -69,12 +86,13 @@
     var learnMore = document.createElement('a');
     learnMore.href = '/privacy.html';
     learnMore.textContent = 'Learn more';
-    learnMore.style.cssText =
-      'color:#8ae2ff;text-decoration:none;border-bottom:1px dotted #8ae2ff;';
     learnMore.target = '_blank';
     learnMore.rel = 'noopener';
+    learnMore.style.cssText =
+      'color:#8ae2ff;text-decoration:none;border-bottom:1px dotted #8ae2ff;';
 
     var acceptBtn = document.createElement('button');
+    acceptBtn.type = 'button';
     acceptBtn.textContent = 'Accept';
     acceptBtn.style.cssText = [
       'background:#0d9488',
@@ -96,6 +114,7 @@
     });
 
     var declineBtn = document.createElement('button');
+    declineBtn.type = 'button';
     declineBtn.textContent = 'Decline';
     declineBtn.style.cssText = [
       'background:transparent',
@@ -113,12 +132,13 @@
     acceptBtn.addEventListener('click', function () {
       setConsent(true);
       bar.remove();
-      initGA4();
+      grantConsent();
     });
+
     declineBtn.addEventListener('click', function () {
       setConsent(false);
       bar.remove();
-      // Don't load GA4 on decline
+      // Consent stays "denied" — no GA4 tracking.
     });
 
     bar.appendChild(msg);
@@ -126,68 +146,11 @@
     bar.appendChild(acceptBtn);
     bar.appendChild(declineBtn);
 
-    // Fade in
-    bar.style.opacity = '0';
-    bar.style.transition = 'opacity 0.3s';
     document.body.appendChild(bar);
+    // Fade in after the next tick so the transition fires
     setTimeout(function () {
       bar.style.opacity = '1';
     }, 50);
-  }
-
-  // --- GA4 Init -------------------------------------------------------------
-  // Defines the global gtag function, injects the GA4 library, and configures
-  // tracking with GDPR-safe consent defaults.
-  function initGA4() {
-    // Standard Google Analytics 4 setup.
-    // gtag must be global so the library can call it, and so the hashchange
-    // handler below can fire events later.
-    window.dataLayer = window.dataLayer || [];
-    function gtag() {
-      window.dataLayer.push(arguments);
-    }
-    window.gtag = gtag;
-
-    // Inject the GA4 library script (async). The queued gtag calls will be
-    // processed once the library finishes loading.
-    var s = document.createElement('script');
-    s.async = true;
-    s.src = 'https://www.googletagmanager.com/gtag/js?id=' + GA_MEASUREMENT_ID;
-    document.head.appendChild(s);
-
-    // Timestamp
-    gtag('js', new Date());
-
-    // Granular consent defaults (GDPR-safe — all denied initially).
-    // GA will NOT set non-essential cookies until we grant them here.
-    if (typeof gtag === 'function') {
-      gtag('consent', 'default', {
-        analytics_storage: 'denied',
-        ad_storage: 'denied',
-        functionality_storage: 'denied',
-        personalization_storage: 'denied',
-        security_storage: 'denied',
-      });
-
-      // Now update to granted (analytics only) — we have explicit consent.
-      gtag('consent', 'update', {
-        analytics_storage: 'granted',
-      });
-
-      gtag('config', GA_MEASUREMENT_ID, {
-        // Disable advertising features
-        allow_google_signals: false,
-        allow_ad_personalization_signals: false,
-        // IP anonymization
-        anonymize_ip: true,
-      });
-
-      // Track the initial page view
-      gtag('event', 'page_view', {
-        page_title: document.title,
-        page_location: window.location.href,
-      });
-    }
   }
 
   // --- Init -----------------------------------------------------------------
@@ -201,8 +164,8 @@
 
   onReady(function () {
     if (getConsent()) {
-      // User previously accepted — load GA4 immediately
-      initGA4();
+      // User previously accepted — grant consent immediately
+      grantConsent();
     } else {
       createBanner();
     }
@@ -210,7 +173,7 @@
 
   // Track SPA-style navigation (hash changes, e.g. anchor links)
   window.addEventListener('hashchange', function () {
-    if (window.gtag && getConsent()) {
+    if (getConsent() && typeof gtag === 'function') {
       gtag('event', 'page_view', {
         page_title: document.title,
         page_location: window.location.href,

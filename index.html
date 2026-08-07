@@ -18,6 +18,39 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   <script>history.scrollRestoration='manual';window.scrollTo(0,0);</script>
   <link rel="stylesheet" href="styles-cubblitz.css?v=13">
+
+  <!-- Configuration (GitHub Gist + GA4 Measurement ID) -->
+  <script src="config.js?v=3"></script>
+
+  <!-- Google Analytics 4 — Consent Mode (GDPR-compliant) -->
+  <!-- The tag is detected by Google immediately, but consent defaults to
+       "denied" so no tracking cookies are set until the visitor accepts. -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-XMLXKBEWM9"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+
+    // Default consent: all denied (GDPR-safe — no cookies until accepted)
+    gtag('consent', 'default', {
+      'analytics_storage': 'denied',
+      'ad_storage': 'denied',
+      'functionality_storage': 'denied',
+      'personalization_storage': 'denied',
+      'security_storage': 'denied'
+    });
+
+    gtag('js', new Date());
+
+    // Configure GA4 (reads Measurement ID from config.js)
+    var gaId = (window.CUBBLITZ_CONFIG && window.CUBBLITZ_CONFIG.gaMeasurementId) || '';
+    if (gaId) {
+      gtag('config', gaId, {
+        'allow_google_signals': false,
+        'allow_ad_personalization_signals': false,
+        'anonymize_ip': true
+      });
+    }
+  </script>
 </head>
 <body>
   <div class="cursor-dot" id="cursor-dot" aria-hidden="true"></div>
@@ -263,7 +296,6 @@
       </p>
     </div>
   </footer>
-  <script src="config.js?v=3"></script>
   <script src="app-cubblitz.js?v=8"></script>
   <script src="analytics.js?v=1"></script>
   <script>
