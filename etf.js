@@ -79,8 +79,8 @@
   var state = {
     etfs: [],
     search: '',
-    sortKey: 'rank',
-    sortDir: 1,
+    sortKey: 'marketCap',
+    sortDir: -1,
     loading: false,
     updatedAt: null
   };
