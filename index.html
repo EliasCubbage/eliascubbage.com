@@ -17,7 +17,7 @@
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230d9488'/%3E%3Ctext x='16' y='22' text-anchor='middle' font-family='Inter,system-ui,sans-serif' font-size='16' font-weight='700' fill='%23ffffff'%3EEC%3C/text%3E%3C/svg%3E" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   <script>history.scrollRestoration='manual';window.scrollTo(0,0);</script>
-  <link rel="stylesheet" href="styles-cubblitz.css?v=13">
+  <link rel="stylesheet" href="styles-cubblitz.css?v=15">
 
   <!-- Configuration (GitHub Gist + GA4 Measurement ID) -->
   <script src="config.js?v=3"></script>
@@ -76,7 +76,7 @@
         <a href="#about" data-nav>About</a>
         <a href="#stack" data-nav>Tools</a>
         <a href="#professional" data-nav>Background</a>
-        <a href="etf.html" data-nav>ETFs</a>
+        <a href="#etf" data-nav>ETFs</a>
         <a href="#game" data-nav>Cubblitz</a>
       </nav>
     </div>
@@ -210,6 +210,70 @@
       </div>
     </section>
 
+    <section id="etf" class="section container reveal">
+      <h2 class="section-title">ETF Tracker</h2>
+      <div class="etf-badge-header">
+        <span>📊</span>
+        <span>Exchange Traded Funds</span>
+      </div>
+      <p class="lead" style="margin:0 0 4px">Real-time prices and performance for the 50 largest ETFs by assets under management. Track the biggest funds in the market.</p>
+
+      <div class="etf-stats" id="etf-stats">
+        <div class="etf-stat-card">
+          <div class="etf-stat-value" id="stat-total-aum">—</div>
+          <div class="etf-stat-label">Total AUM Tracked</div>
+        </div>
+        <div class="etf-stat-card">
+          <div class="etf-stat-value" id="stat-top-gainer">—</div>
+          <div class="etf-stat-label">Top Gainer</div>
+        </div>
+        <div class="etf-stat-card">
+          <div class="etf-stat-value" id="stat-top-loser">—</div>
+          <div class="etf-stat-label">Top Loser</div>
+        </div>
+        <div class="etf-stat-card">
+          <div class="etf-stat-value" id="stat-avg-change">—</div>
+          <div class="etf-stat-label">Avg Change %</div>
+        </div>
+      </div>
+
+      <div class="stocks-controls">
+        <div class="stocks-search">
+          <input type="text" id="search-input" placeholder="Search symbol or name…" autocomplete="off" aria-label="Search ETFs" />
+        </div>
+        <button id="refresh-btn" class="btn ghost refresh-btn" type="button">↻ Refresh</button>
+      </div>
+      <div class="stocks-meta">
+        <span id="stocks-count" class="stock-count">Loading…</span>
+        <span id="stocks-updated" class="stock-updated"></span>
+      </div>
+
+      <div id="stocks-status" class="stocks-status" role="status" aria-live="polite">
+        <div class="spinner"></div>
+        <p>Loading ETF data…</p>
+      </div>
+      <div id="stocks-table-wrap" class="etf-table-wrap" hidden>
+        <table class="etf-table" id="stocks-table">
+          <thead>
+            <tr>
+              <th class="sortable" data-sort="rank">#</th>
+              <th class="sortable" data-sort="symbol">Symbol</th>
+              <th class="sortable" data-sort="name">Name</th>
+              <th class="sortable" data-sort="price">Price</th>
+              <th class="sortable" data-sort="change">Chg</th>
+              <th class="sortable" data-sort="changePercent">Chg %</th>
+              <th class="sortable" data-sort="volume">Volume</th>
+              <th class="sortable" data-sort="marketCap">AUM</th>
+              <th class="sortable" data-sort="high">52W High</th>
+              <th class="sortable" data-sort="low">52W Low</th>
+            </tr>
+          </thead>
+          <tbody id="stocks-body"></tbody>
+        </table>
+      </div>
+      <p class="etf-disclaimer">Data delays may occur. Not investment advice. Prices are near real-time via Yahoo Finance. AUM = Assets Under Management.</p>
+    </section>
+
     <section id="game" class="section container reveal">
       <h2>CUBBLITZ</h2>
       <p>Defend the grid. Clear every wave. Survive as long as you can.</p>
@@ -298,6 +362,7 @@
       </p>
     </div>
   </footer>
+  <script src="etf.js"></script>
   <script src="app-cubblitz.js?v=8"></script>
   <script src="analytics.js?v=1"></script>
   <script>

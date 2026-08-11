@@ -420,7 +420,8 @@
 
     var navToggle = $('nav-toggle');
     var nav = $('nav');
-    if (navToggle && nav) {
+    if (navToggle && nav && !navToggle.dataset.etfBound) {
+      navToggle.dataset.etfBound = '1';
       navToggle.addEventListener('click', function () {
         nav.classList.toggle('open');
       });

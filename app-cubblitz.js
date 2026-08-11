@@ -7,7 +7,10 @@ document.addEventListener('DOMContentLoaded',function(){
   // mobile nav toggle
   var toggle=document.getElementById('nav-toggle');
   var nav=document.getElementById('nav');
-  if(toggle){ toggle.addEventListener('click',function(){ nav.classList.toggle('open'); }); }
+  if(toggle && nav && !toggle.dataset.etfBound){
+    toggle.dataset.etfBound='1';
+    toggle.addEventListener('click',function(){ nav.classList.toggle('open'); });
+  }
 
   // dynamic year
   var y=document.getElementById('year'); if(y) y.textContent=new Date().getFullYear();

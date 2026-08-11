@@ -338,6 +338,209 @@ body{
 }
 .captcha-noscript a{color:var(--accent)}
 
+/* ===== ETF Tracker ===== */
+#etf .section-title{justify-content:center;text-align:center}
+#etf .section-title::before{display:none}
+.etf-badge-header{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:6px 16px;border-radius:999px;
+  background:rgba(37,99,235,0.08);
+  border:1px solid rgba(37,99,235,0.2);
+  color:var(--accent-2);
+  font-size:0.85rem;font-weight:700;
+  margin-bottom:16px;letter-spacing:0.02em;
+}
+.etf-stats{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+  gap:16px;
+  margin:24px 0 32px;
+}
+.etf-stat-card{
+  padding:20px 24px;
+  border-radius:var(--radius);
+  background:linear-gradient(135deg,var(--card) 0%,var(--card-2) 100%);
+  border:1px solid var(--border);
+  box-shadow:var(--shadow);
+  transition:transform 0.3s var(--ease),border-color 0.3s var(--ease),box-shadow 0.3s var(--ease);
+}
+.etf-stat-card:hover{
+  transform:translateY(-4px);
+  border-color:rgba(13,148,136,0.3);
+  box-shadow:0 14px 48px -12px rgba(15,23,42,0.2);
+}
+.etf-stat-value{
+  font-size:1.8rem;font-weight:800;
+  background:var(--accent-grad);
+  -webkit-background-clip:text;
+  background-clip:text;
+  -webkit-text-fill-color:transparent;
+  margin:0 0 4px;
+  letter-spacing:-0.02em;
+}
+.etf-stat-label{
+  font-size:0.85rem;font-weight:600;
+  color:var(--muted);
+  margin:0;
+}
+.etf-table-wrap{
+  overflow-x:auto;
+  border:1px solid var(--border);
+  border-radius:var(--radius-lg);
+  background:var(--card);
+  box-shadow:var(--shadow);
+  position:relative;
+}
+.etf-table-wrap::before{
+  content:'';
+  position:absolute;
+  top:0;left:0;right:0;
+  height:4px;
+  background:var(--accent-grad);
+  border-radius:var(--radius-lg) var(--radius-lg) 0 0;
+}
+.etf-table{
+  width:100%;
+  border-collapse:collapse;
+  font-size:0.82rem;
+}
+.etf-table thead th{
+  position:sticky;
+  top:0;
+  background:var(--card-2);
+  color:var(--muted);
+  font-size:0.7rem;
+  font-weight:700;
+  letter-spacing:0.05em;
+  text-transform:uppercase;
+  padding:10px 8px;
+  text-align:left;
+  border-bottom:1px solid var(--border);
+  white-space:nowrap;
+  cursor:pointer;
+  user-select:none;
+  transition:color 0.2s var(--ease),background 0.2s var(--ease);
+}
+.etf-table thead th:nth-child(6),
+.etf-table tbody td:nth-child(6){ display:none; }
+.etf-table thead th:nth-child(7),
+.etf-table tbody td:nth-child(7){ display:none; }
+.etf-table thead th:nth-child(9),
+.etf-table tbody td:nth-child(9){ display:none; }
+.etf-table thead th:nth-child(10),
+.etf-table tbody td:nth-child(10){ display:none; }
+.etf-table thead th:hover{
+  color:var(--text);
+  background:rgba(15,23,42,0.03);
+}
+.etf-table thead th.sorted{color:var(--accent)}
+.etf-table thead th.sorted::after{
+  content:'';
+  display:inline-block;
+  margin-left:6px;
+  width:0;height:0;
+  border-left:4px solid transparent;
+  border-right:4px solid transparent;
+}
+.etf-table thead th.sorted.asc::after{border-bottom:5px solid var(--accent)}
+.etf-table thead th.sorted.desc::after{border-top:5px solid var(--accent)}
+.etf-table tbody td{
+  padding:12px;
+  border-bottom:1px solid var(--border);
+  white-space:nowrap;
+  font-variant-numeric:tabular-nums;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.etf-table tbody tr:last-child td{border-bottom:0}
+.etf-table tbody tr{transition:background 0.2s var(--ease)}
+.etf-table tbody tr:hover{background:rgba(13,148,136,0.04)}
+.etf-table .rank{
+  color:var(--muted-2);font-weight:600;font-size:0.85rem;width:50px;
+}
+.etf-table .symbol-col{font-weight:700;width:120px}
+.etf-table .ticker{
+  font-family:ui-monospace,'SF Mono',Menlo,monospace;
+  font-weight:700;letter-spacing:0.02em;
+  color:var(--text);
+  background:rgba(13,148,136,0.08);
+  padding:3px 8px;
+  border-radius:6px;
+  font-size:0.82rem;
+}
+.etf-table .name-col{
+  color:var(--muted);
+  max-width:240px;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.etf-table .num{text-align:right}
+.etf-table .price{font-weight:700;color:var(--text)}
+.etf-table .pos{color:#059669;font-weight:600}
+.etf-table .neg{color:#dc2626;font-weight:600}
+.etf-table .flat{color:var(--muted-2)}
+.etf-table .muted{color:var(--muted-2)}
+.etf-table .marketcap{font-weight:600;color:var(--text)}
+.etf-disclaimer{
+  margin:20px 0 0;
+  color:var(--muted-2);
+  font-size:0.78rem;
+  text-align:center;
+}
+
+/* stocks controls & status */
+.stocks-controls{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin:0 0 8px}
+.stocks-search{flex:1;min-width:200px}
+.stocks-search input{
+  width:100%;
+  padding:11px 16px;
+  border:1px solid var(--border-strong);
+  border-radius:11px;
+  background:var(--card);
+  color:var(--text);
+  font-size:0.92rem;
+  font-family:inherit;
+  outline:none;
+  transition:border-color 0.25s var(--ease),box-shadow 0.25s var(--ease);
+}
+.stocks-search input::placeholder{color:var(--muted-2)}
+.stocks-search input:focus{
+  border-color:var(--accent);
+  box-shadow:0 0 0 4px rgba(13,148,136,0.12);
+}
+.refresh-btn{flex:0 0 auto}
+.stocks-meta{display:flex;gap:16px;flex-wrap:wrap;align-items:center;margin:0 0 16px}
+.stock-count{font-size:0.85rem;font-weight:600;color:var(--muted)}
+.stock-updated{font-size:0.78rem;color:var(--muted-2)}
+.stocks-status{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:12px;
+  padding:48px 24px;
+  border:1px solid var(--border);
+  border-radius:var(--radius-lg);
+  background:var(--card);
+  color:var(--muted);
+  text-align:center;
+}
+.stocks-status.error{border-color:rgba(220,38,38,0.2);color:#dc2626}
+.stocks-status p{margin:0;font-size:0.92rem}
+.status-icon{font-size:1.4rem;line-height:1}
+.spinner{
+  width:32px;height:32px;
+  border:3px solid rgba(13,148,136,0.15);
+  border-top-color:var(--accent);
+  border-radius:50%;
+  animation:etfSpin 0.8s linear infinite;
+}
+@keyframes etfSpin{to{transform:rotate(360deg)}}
+@media (max-width:680px){
+  .etf-stats{grid-template-columns:1fr}
+  .stocks-controls{flex-direction:column;align-items:stretch}
+}
+
 /* ===== Footer ===== */
 .site-footer{padding:40px 0;border-top:1px solid var(--border);margin-top:40px}
 .footer-inner{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
