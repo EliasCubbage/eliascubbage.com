@@ -58,21 +58,7 @@
     { symbol: 'XLC',   name: 'Communication Services Select SPDR',        aumB: 15   },
     { symbol: 'BIL',   name: 'SPDR Bloomberg 1-3 Month T-Bill ETF',       aumB: 40   },
     { symbol: 'VB',    name: 'Vanguard Small-Cap ETF',                    aumB: 65   },
-    { symbol: 'SPYV',  name: 'SPDR Portfolio S&P 500 Value ETF',          aumB: 10   },
-    { symbol: 'VBR',   name: 'Vanguard Small-Cap Value ETF',              aumB: 55   },
-    { symbol: 'SOXX',  name: 'iShares Semiconductor ETF',                 aumB: 15   },
-    { symbol: 'ARKK',  name: 'ARK Innovation ETF',                        aumB: 6    },
-    { symbol: 'SLV',   name: 'iShares Silver Trust',                      aumB: 14   },
-    { symbol: 'USO',   name: 'United States Oil Fund',                    aumB: 2    },
-    { symbol: 'VGK',   name: 'Vanguard FTSE Europe ETF',                  aumB: 20   },
-    { symbol: 'XLB',   name: 'Materials Select Sector SPDR',              aumB: 7    },
-    { symbol: 'XLU',   name: 'Utilities Select Sector SPDR',              aumB: 15   },
-    { symbol: 'EEM',   name: 'iShares MSCI Emerging Markets ETF',         aumB: 18   },
-    { symbol: 'DVY',   name: 'iShares Select Dividend ETF',               aumB: 18   },
-    { symbol: 'SQQQ',  name: 'ProShares UltraPro Short QQQ',              aumB: 3    },
-    { symbol: 'KRE',   name: 'SPDR S&P Regional Banking ETF',             aumB: 2    },
-    { symbol: 'IBB',   name: 'iShares Biotechnology ETF',                 aumB: 8    },
-    { symbol: 'MUB',   name: 'iShares National Muni Bond ETF',            aumB: 25   }
+    { symbol: 'SPYV',  name: 'SPDR Portfolio S&P 500 Value ETF',          aumB: 10   }
   ];
 
   // State
@@ -341,7 +327,6 @@
         '</td>' +
         '<td class="name-col">' + escapeHtml(item.name) + '</td>' +
         '<td class="num price">' + fmtPrice(item.price) + '</td>' +
-        '<td class="num ' + changeCls + '">' + fmtChange(item.change) + '</td>' +
         '<td class="num ' + changeCls + '">' + fmtChangePct(item.changePercent) + '</td>' +
         '<td class="num muted">' + fmtVolume(item.volume) + '</td>' +
         '<td class="num marketcap">' + fmtMoney(item.marketCap) + '</td>' +
