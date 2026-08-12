@@ -184,6 +184,29 @@
       });
   }
 
+  function fetchQuoteData(symbols) {
+    var url = CORS_PROXY + encodeURIComponent(
+      'https://query1.finance.yahoo.com/v7/finance/quote?symbols=' + symbols.join(',')
+    );
+    return fetch(url)
+      .then(function (r) {
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.json();
+      })
+      .then(parseProxyResponse)
+      .then(function (data) {
+        var results = data && data.quoteResponse && data.quoteResponse.result;
+        if (!results) throw new Error('No quote data');
+        var map = {};
+        results.forEach(function (q) {
+          if (q.totalAssets != null) {
+            map[q.symbol] = q.totalAssets;
+          }
+        });
+        return map;
+      });
+  }
+
   function fetchAll(symbols, aumGetter) {
     var CONCURRENCY = 8;
     var results = [];
@@ -228,10 +251,22 @@
     state.loading = true;
     setStatus('Loading ETF data…', true);
 
+    var symbols = ETF_LIST.map(function (e) { return e.symbol; });
     var etfPromise = fetchAll(ETF_LIST, function (e) { return e.aumB; });
+    var quotePromise = fetchQuoteData(symbols).catch(function () { return {}; });
 
-    etfPromise
-      .then(function (etfs) {
+    Promise.all([etfPromise, quotePromise])
+      .then(function (results) {
+        var etfs = results[0];
+        var aumMap = results[1];
+
+        // Override hardcoded AUM with live AUM from Yahoo Finance when available
+        etfs.forEach(function (e) {
+          if (aumMap[e.symbol] != null) {
+            e.marketCap = aumMap[e.symbol];
+          }
+        });
+
         state.etfs = etfs;
         state.updatedAt = Date.now();
         state.etfs.sort(function (a, b) {
