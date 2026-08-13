@@ -1,11 +1,16 @@
 /* ============================================================
    ETF Tracker — Top 50 ETFs by AUM
-   Real-time data via Yahoo Finance (with CORS proxy)
+   Bulk data via Yahoo Finance spark endpoint (with CORS proxy)
+   localStorage cache for instant loads
    ============================================================ */
 (function () {
   'use strict';
 
   var CORS_PROXY = 'https://api.allorigins.win/get?url=';
+
+  /* Batch sizes we'll split the 50 symbols into.
+     (spark endpoint struggles with >10 at once through the proxy.) */
+  var BATCH_SIZE = 5;
 
   // Top 50 ETFs by assets under management (B USD), ordered by AUM descending.
   var ETF_LIST = [
@@ -61,6 +66,9 @@
     { symbol: 'SPYV',  name: 'SPDR Portfolio S&P 500 Value ETF',          aumB: 10   }
   ];
 
+  var CACHE_KEY = 'etf_data';
+  var CACHE_TTL = 5 * 60 * 1000; // 5 minutes before background refresh
+
   // State
   var state = {
     etfs: [],
@@ -78,7 +86,7 @@
   function $(id) { return document.getElementById(id); }
 
   function fmtMoney(v) {
-    if (v == null || isNaN(v)) return '—';
+    if (v == null || isNaN(v)) return '\u2014';
     if (v >= 1e12) return '$' + (v / 1e12).toFixed(2) + 'T';
     if (v >= 1e9)  return '$' + (v / 1e9).toFixed(1) + 'B';
     if (v >= 1e6)  return '$' + (v / 1e6).toFixed(0) + 'M';
@@ -86,31 +94,25 @@
   }
 
   function fmtPrice(v) {
-    if (v == null || isNaN(v)) return '—';
+    if (v == null || isNaN(v)) return '\u2014';
     return '$' + v.toFixed(2);
   }
 
   function fmtVolume(v) {
-    if (v == null || isNaN(v)) return '—';
+    if (v == null || isNaN(v)) return '\u2014';
     if (v >= 1e9) return (v / 1e9).toFixed(1) + 'B';
     if (v >= 1e6) return (v / 1e6).toFixed(1) + 'M';
     return v.toLocaleString();
   }
 
-  function fmtChange(v) {
-    if (v == null || isNaN(v)) return '—';
-    var s = v > 0 ? '+' : '';
-    return s + '$' + v.toFixed(2);
-  }
-
   function fmtChangePct(v) {
-    if (v == null || isNaN(v)) return '—';
+    if (v == null || isNaN(v)) return '\u2014';
     var s = v > 0 ? '+' : '';
     return s + v.toFixed(2) + '%';
   }
 
   function fmtPercent(v) {
-    if (v == null || isNaN(v)) return '—';
+    if (v == null || isNaN(v)) return '\u2014';
     var s = v > 0 ? '+' : '';
     return s + v.toFixed(2) + '%';
   }
@@ -125,160 +127,179 @@
   }
 
   function cleanName(raw) {
-    if (!raw) return '—';
+    if (!raw) return '\u2014';
     return raw.replace(/ T$/, '').trim();
   }
 
   function escapeHtml(s) {
     if (s == null) return '';
+    var amp = '&';
     var map = {
-      '&': '&' + 'amp;',
-      '<': '&' + 'lt;',
-      '>': '&' + 'gt;',
-      '"': '&' + 'quot;',
-      "'": '&' + '#39;'
+      '&': amp + 'amp;',
+      '<': amp + 'lt;',
+      '>': amp + 'gt;',
+      '"': amp + 'quot;',
+      "'": amp + '#39;'
     };
     return String(s).replace(/[&<>"']/g, function (c) { return map[c]; });
   }
 
-  /* ---------- Data fetching ---------- */
+  /* ---------- Cache ---------- */
 
-  function parseProxyResponse(json) {
-    if (!json) throw new Error('Empty response');
-    if (typeof json.contents === 'string') {
-      return JSON.parse(json.contents);
-    }
-    if (json.status && typeof json.status === 'object') {
-      throw new Error('Proxy error: ' + (json.status.http_code || 'unknown'));
-    }
-    return json;
+  function getCache() {
+    try {
+      var item = localStorage.getItem(CACHE_KEY);
+      if (item) {
+        var parsed = JSON.parse(item);
+        // Only use cache if it has data and is not too old for an initial render
+        if (parsed && parsed.etfs && parsed.etfs.length > 0) {
+          return parsed;
+        }
+      }
+    } catch (e) { /* ignore */ }
+    return null;
   }
 
-  function fetchChartData(symbol) {
+  function setCache(etfs, updatedAt) {
+    try {
+      localStorage.setItem(CACHE_KEY, JSON.stringify({
+        etfs: etfs,
+        updatedAt: updatedAt || Date.now()
+      }));
+    } catch (e) { /* ignore */ }
+  }
+
+  /* ---------- Data fetching (bulk spark) ---------- */
+
+  function parseSparkMeta(meta) {
+    // Compute change from chartPreviousClose and regularMarketPrice
+    var prevClose = meta.chartPreviousClose || meta.regularMarketPrice;
+    var price = meta.regularMarketPrice;
+    var change = price != null && prevClose != null ? price - prevClose : null;
+    var changePercent = change != null && prevClose ? (change / prevClose) * 100 : null;
+    return {
+      price: price,
+      change: change,
+      changePercent: changePercent,
+      volume: meta.regularMarketVolume != null ? meta.regularMarketVolume : null,
+      high: meta.fiftyTwoWeekHigh != null ? meta.fiftyTwoWeekHigh : null,
+      low: meta.fiftyTwoWeekLow != null ? meta.fiftyTwoWeekLow : null,
+      name: cleanName(meta.shortName || meta.longName || '')
+    };
+  }
+
+  function fetchSparkBatch(symbols) {
     var url = CORS_PROXY + encodeURIComponent(
-      'https://query1.finance.yahoo.com/v8/finance/chart/' + symbol + '?interval=1d&range=1d'
+      'https://query1.finance.yahoo.com/v7/finance/spark?symbols=' + symbols.join(',') + '&range=1d&interval=1d'
     );
     return fetch(url)
       .then(function (r) {
         if (!r.ok) throw new Error('HTTP ' + r.status);
         return r.json();
       })
-      .then(parseProxyResponse)
-      .then(function (data) {
-        var meta = data && data.chart && data.chart.result && data.chart.result[0] && data.chart.result[0].meta;
-        if (!meta) throw new Error('No chart data');
-        var prevClose = meta.chartPreviousClose || meta.previousClose || meta.regularMarketPrice;
-        var price = meta.regularMarketPrice;
-        var change = price != null && prevClose != null ? price - prevClose : null;
-        var changePercent = change != null && prevClose ? (change / prevClose) * 100 : null;
-        return {
-          symbol: meta.symbol || symbol,
-          name: cleanName(meta.shortName || meta.longName || symbol),
-          price: price,
-          change: change,
-          changePercent: changePercent,
-          volume: meta.regularMarketVolume != null ? meta.regularMarketVolume : null,
-          high: meta.fiftyTwoWeekHigh != null ? meta.fiftyTwoWeekHigh : null,
-          low: meta.fiftyTwoWeekLow != null ? meta.fiftyTwoWeekLow : null
-        };
-      });
-  }
-
-  function fetchQuoteData(symbols) {
-    var url = CORS_PROXY + encodeURIComponent(
-      'https://query1.finance.yahoo.com/v7/finance/quote?symbols=' + symbols.join(',')
-    );
-    return fetch(url)
-      .then(function (r) {
-        if (!r.ok) throw new Error('HTTP ' + r.status);
-        return r.json();
-      })
-      .then(parseProxyResponse)
-      .then(function (data) {
-        var results = data && data.quoteResponse && data.quoteResponse.result;
-        if (!results) throw new Error('No quote data');
+      .then(function (raw) {
+        // allorigins wraps the response
+        var contents = (typeof raw.contents === 'string') ? JSON.parse(raw.contents) : raw;
+        var results = contents && contents.spark && contents.spark.result;
+        if (!results || !results.length) throw new Error('No spark data');
         var map = {};
-        results.forEach(function (q) {
-          if (q.totalAssets != null) {
-            map[q.symbol] = q.totalAssets;
-          }
+        results.forEach(function (entry) {
+          var symbol = entry.symbol;
+          var meta = entry.response && entry.response[0] && entry.response[0].meta;
+          if (!meta) return;
+          map[symbol] = meta;
         });
         return map;
       });
   }
 
-  function fetchAll(symbols, aumGetter) {
-    var CONCURRENCY = 8;
-    var results = [];
-    var idx = 0;
-
-    function worker() {
-      if (idx >= symbols.length) return Promise.resolve();
-      var i = idx++;
-      var item = symbols[i];
-      return fetchChartData(item.symbol)
-        .then(function (d) {
-          d.type = 'etf';
-          d.marketCap = aumGetter(item) * 1e9;
-          results.push(d);
-        })
-        .catch(function () {
-          results.push({
-            symbol: item.symbol,
-            name: item.name,
-            price: null,
-            change: null,
-            changePercent: null,
-            volume: null,
-            marketCap: aumGetter(item) * 1e9,
-            high: null,
-            low: null,
-            type: 'etf'
-          });
-        })
-        .then(worker);
+  function fetchAllSpark(etfList) {
+    // Split into batch_size groups, fetch in parallel
+    var batches = [];
+    for (var i = 0; i < etfList.length; i += BATCH_SIZE) {
+      var batch = etfList.slice(i, i + BATCH_SIZE);
+      var symbols = batch.map(function (e) { return e.symbol; });
+      batches.push(fetchSparkBatch(symbols));
     }
 
-    var workers = [];
-    for (var w = 0; w < CONCURRENCY; w++) {
-      workers.push(worker());
-    }
-    return Promise.all(workers).then(function () { return results; });
+    // Run all batch requests in parallel
+    return Promise.all(batches).then(function (batchResults) {
+      // Merge all meta maps
+      var merged = {};
+      batchResults.forEach(function (map) {
+        Object.keys(map).forEach(function (sym) {
+          merged[sym] = map[sym];
+        });
+      });
+      return merged;
+    });
   }
 
-  function loadData() {
+  /* ---------- Load / Refresh ---------- */
+
+  function loadData(silent) {
     if (state.loading) return;
     state.loading = true;
-    setStatus('Loading ETF data…', true);
 
-    var symbols = ETF_LIST.map(function (e) { return e.symbol; });
-    var etfPromise = fetchAll(ETF_LIST, function (e) { return e.aumB; });
-    var quotePromise = fetchQuoteData(symbols).catch(function () { return {}; });
+    if (!silent) {
+      setStatus('Loading ETF data\u2026', true);
+    }
 
-    Promise.all([etfPromise, quotePromise])
-      .then(function (results) {
-        var etfs = results[0];
-        var aumMap = results[1];
-
-        // Override hardcoded AUM with live AUM from Yahoo Finance when available
-        etfs.forEach(function (e) {
-          if (aumMap[e.symbol] != null) {
-            e.marketCap = aumMap[e.symbol];
+    fetchAllSpark(ETF_LIST)
+      .then(function (metaMap) {
+        // Build etfs array from our static list + live spark meta
+        var etfs = ETF_LIST.map(function (item) {
+          var meta = metaMap[item.symbol];
+          if (meta) {
+            var info = parseSparkMeta(meta);
+            return {
+              symbol:     item.symbol,
+              name:       info.name || item.name,
+              price:      info.price,
+              change:     info.change,
+              changePercent: info.changePercent,
+              volume:     info.volume,
+              high:       info.high,
+              low:        info.low,
+              marketCap:  item.aumB * 1e9,
+              type:       'etf'
+            };
+          } else {
+            return {
+              symbol:     item.symbol,
+              name:       item.name,
+              price:      null,
+              change:     null,
+              changePercent: null,
+              volume:     null,
+              high:       null,
+              low:        null,
+              marketCap:  item.aumB * 1e9,
+              type:       'etf'
+            };
           }
+        });
+
+        // Sort by AUM desc
+        etfs.sort(function (a, b) {
+          return (b.marketCap || 0) - (a.marketCap || 0);
         });
 
         state.etfs = etfs;
         state.updatedAt = Date.now();
-        state.etfs.sort(function (a, b) {
-          return (b.marketCap || 0) - (a.marketCap || 0);
-        });
         state.loading = false;
+
+        // Cache for instant loads
+        setCache(etfs, state.updatedAt);
+
         render();
         updateStats();
       })
       .catch(function (e) {
         state.loading = false;
-        setStatus('Failed to load ETF data. Refresh to retry.', false);
+        if (!silent) {
+          setStatus('Failed to load ETF data. Refresh to retry.', false);
+        }
         console.error(e);
       });
   }
@@ -289,26 +310,23 @@
     var etfs = state.etfs;
     if (!etfs.length) return;
 
-    // Total AUM
     var totalAum = etfs.reduce(function (sum, e) { return sum + (e.marketCap || 0); }, 0);
     var totalAumEl = $('stat-total-aum');
     if (totalAumEl) totalAumEl.textContent = fmtMoney(totalAum);
 
-    // Top gainer / loser by %
     var valid = etfs.filter(function (e) { return e.changePercent != null; });
     var topGainer = valid.length ? valid.reduce(function (a, b) { return a.changePercent > b.changePercent ? a : b; }) : null;
     var topLoser = valid.length ? valid.reduce(function (a, b) { return a.changePercent < b.changePercent ? a : b; }) : null;
 
     var gainerEl = $('stat-top-gainer');
-    if (gainerEl) gainerEl.textContent = topGainer ? topGainer.symbol + ' ' + fmtPercent(topGainer.changePercent) : '—';
+    if (gainerEl) gainerEl.textContent = topGainer ? topGainer.symbol + ' ' + fmtPercent(topGainer.changePercent) : '\u2014';
 
     var loserEl = $('stat-top-loser');
-    if (loserEl) loserEl.textContent = topLoser ? topLoser.symbol + ' ' + fmtPercent(topLoser.changePercent) : '—';
+    if (loserEl) loserEl.textContent = topLoser ? topLoser.symbol + ' ' + fmtPercent(topLoser.changePercent) : '\u2014';
 
-    // Avg change %
     var avgChange = valid.length ? valid.reduce(function (sum, e) { return sum + e.changePercent; }, 0) / valid.length : null;
     var avgEl = $('stat-avg-change');
-    if (avgEl) avgEl.textContent = avgChange != null ? fmtPercent(avgChange) : '—';
+    if (avgEl) avgEl.textContent = avgChange != null ? fmtPercent(avgChange) : '\u2014';
   }
 
   /* ---------- Rendering ---------- */
@@ -372,7 +390,7 @@
     });
 
     els.count.textContent = all.length + ' ETFs';
-    els.updated.textContent = state.updatedAt ? 'Updated ' + timeAgo(state.updatedAt) + ' · Yahoo Finance' : '';
+    els.updated.textContent = state.updatedAt ? 'Updated ' + timeAgo(state.updatedAt) + ' \u00b7 Yahoo Finance' : '';
 
     if (all.length > 0) {
       els.status.hidden = true;
@@ -380,7 +398,7 @@
     } else {
       els.status.hidden = false;
       els.tableWrap.hidden = true;
-      setStatus(state.loading ? 'Loading…' : (state.search ? 'No matches found' : 'No data available'), !state.loading);
+      setStatus(state.loading ? 'Loading\u2026' : (state.search ? 'No matches found' : 'No data available'), !state.loading);
     }
 
     document.querySelectorAll('.etf-table th[data-sort]').forEach(function (th) {
@@ -398,7 +416,7 @@
       if (isInfo) {
         icon = '<div class="spinner"></div>';
       } else {
-        icon = '<span class="status-icon">⚠</span>';
+        icon = '<span class="status-icon">\u26A0</span>';
       }
       els.status.innerHTML = icon + '<p>' + escapeHtml(msg) + '</p>';
       if (!isInfo) {
@@ -422,7 +440,7 @@
     });
 
     els.refresh.addEventListener('click', function () {
-      loadData();
+      loadData(true);
     });
 
     document.querySelectorAll('.etf-table th[data-sort]').forEach(function (th) {
@@ -465,10 +483,24 @@
     if (yearEl) yearEl.textContent = new Date().getFullYear();
 
     initEvents();
-    loadData();
 
-    // Auto-refresh every 60 seconds
-    setInterval(loadData, 60000);
+    // 1) Render cached data immediately (no flash, no spinner)
+    var cached = getCache();
+    if (cached && cached.etfs && cached.etfs.length > 0) {
+      state.etfs = cached.etfs;
+      state.updatedAt = cached.updatedAt;
+      render();
+      updateStats();
+      // Hide status since we have data
+      if (els.status) els.status.hidden = true;
+      if (els.tableWrap) els.tableWrap.hidden = false;
+    }
+
+    // 2) Fetch fresh data in the background
+    loadData(!!cached);
+
+    // 3) Auto-refresh every 5 minutes instead of 60 seconds
+    setInterval(function () { loadData(true); }, 300000);
   }
 
   if (document.readyState === 'loading') {
