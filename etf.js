@@ -11,6 +11,78 @@
   var CACHE_KEY = 'etf_data';
   var CACHE_TTL = 10 * 60 * 1000; // 10 minutes before considering localStorage stale
 
+  // Fallback list (names + AUM) so the table always renders all 50 ETFs
+  // even if etf-data.json can't be fetched (e.g. opened as a local file).
+  var FALLBACK_LIST = [
+    { symbol: 'VOO',   name: 'Vanguard S&P 500 ETF',                      aumB: 1255 },
+    { symbol: 'IVV',   name: 'iShares Core S&P 500 ETF',                  aumB: 1190 },
+    { symbol: 'SPY',   name: 'State Street SPDR S&P 500 ETF Trust',       aumB: 655  },
+    { symbol: 'VTI',   name: 'Vanguard Total Stock Market ETF',           aumB: 520  },
+    { symbol: 'QQQ',   name: 'Invesco QQQ Trust',                         aumB: 335  },
+    { symbol: 'VTV',   name: 'Vanguard Value ETF',                        aumB: 110  },
+    { symbol: 'VXUS',  name: 'Vanguard Total International Stock ETF',    aumB: 92   },
+    { symbol: 'BND',   name: 'Vanguard Total Bond Market ETF',            aumB: 108  },
+    { symbol: 'AGG',   name: 'iShares Core U.S. Aggregate Bond ETF',      aumB: 105  },
+    { symbol: 'VEA',   name: 'Vanguard FTSE Developed Markets ETF',       aumB: 60   },
+    { symbol: 'VIG',   name: 'Vanguard Dividend Appreciation ETF',        aumB: 90   },
+    { symbol: 'SCHD',  name: 'Schwab U.S. Dividend Equity ETF',           aumB: 75   },
+    { symbol: 'VUG',   name: 'Vanguard Growth ETF',                       aumB: 70   },
+    { symbol: 'IEFA',  name: 'iShares Core MSCI EAFE ETF',                aumB: 100  },
+    { symbol: 'IJR',   name: 'iShares Core S&P Small-Cap ETF',            aumB: 80   },
+    { symbol: 'IWM',   name: 'iShares Russell 2000 ETF',                  aumB: 65   },
+    { symbol: 'VYM',   name: 'Vanguard High Dividend Yield ETF',          aumB: 65   },
+    { symbol: 'XLF',   name: 'Financial Select Sector SPDR',              aumB: 42   },
+    { symbol: 'XLK',   name: 'Technology Select Sector SPDR',             aumB: 80   },
+    { symbol: 'XLE',   name: 'Energy Select Sector SPDR',                 aumB: 38   },
+    { symbol: 'XLV',   name: 'Health Care Select Sector SPDR',            aumB: 40   },
+    { symbol: 'VGT',   name: 'Vanguard Information Technology ETF',       aumB: 85   },
+    { symbol: 'GLD',   name: 'SPDR Gold Shares',                          aumB: 78   },
+    { symbol: 'VWO',   name: 'Vanguard FTSE Emerging Markets ETF',        aumB: 85   },
+    { symbol: 'IWF',   name: 'iShares Russell 1000 Growth ETF',           aumB: 88   },
+    { symbol: 'VHT',   name: 'Vanguard Health Care ETF',                  aumB: 30   },
+    { symbol: 'EFA',   name: 'iShares MSCI EAFE ETF',                     aumB: 47   },
+    { symbol: 'IWD',   name: 'iShares Russell 1000 Value ETF',            aumB: 65   },
+    { symbol: 'TLT',   name: 'iShares 20+ Year Treasury Bond ETF',        aumB: 47   },
+    { symbol: 'QQQM',  name: 'Invesco NASDAQ 100 ETF',                    aumB: 45   },
+    { symbol: 'VNQ',   name: 'Vanguard Real Estate ETF',                  aumB: 28   },
+    { symbol: 'VT',    name: 'Vanguard Total World Stock ETF',            aumB: 50   },
+    { symbol: 'DIA',   name: 'SPDR Dow Jones Industrial Average ETF',     aumB: 35   },
+    { symbol: 'IEMG',  name: 'iShares Core MSCI Emerging Markets ETF',    aumB: 70   },
+    { symbol: 'LQD',   name: 'iShares iBoxx Investment Grade Bond',       aumB: 30   },
+    { symbol: 'JEPI',  name: 'JPMorgan Equity Premium Income ETF',        aumB: 40   },
+    { symbol: 'TQQQ',  name: 'ProShares UltraPro QQQ',                    aumB: 20   },
+    { symbol: 'SHY',   name: 'iShares 1-3 Year Treasury Bond ETF',        aumB: 15   },
+    { symbol: 'XLY',   name: 'Consumer Discretionary Select SPDR',        aumB: 25   },
+    { symbol: 'XLP',   name: 'Consumer Staples Select Sector SPDR',       aumB: 16   },
+    { symbol: 'HYG',   name: 'iShares iBoxx High Yield Corporate Bond',   aumB: 16   },
+    { symbol: 'IEF',   name: 'iShares 7-10 Year Treasury Bond ETF',       aumB: 22   },
+    { symbol: 'XLI',   name: 'Industrial Select Sector SPDR',             aumB: 20   },
+    { symbol: 'SPYG',  name: 'SPDR Portfolio S&P 500 Growth ETF',         aumB: 20   },
+    { symbol: 'XBI',   name: 'SPDR S&P Biotech ETF',                      aumB: 7    },
+    { symbol: 'GDX',   name: 'VanEck Gold Miners ETF',                    aumB: 16   },
+    { symbol: 'XLC',   name: 'Communication Services Select SPDR',        aumB: 15   },
+    { symbol: 'BIL',   name: 'SPDR Bloomberg 1-3 Month T-Bill ETF',       aumB: 40   },
+    { symbol: 'VB',    name: 'Vanguard Small-Cap ETF',                    aumB: 65   },
+    { symbol: 'SPYV',  name: 'SPDR Portfolio S&P 500 Value ETF',          aumB: 10   }
+  ];
+
+  function fallbackEtfs() {
+    return FALLBACK_LIST.map(function (e) {
+      return {
+        symbol: e.symbol,
+        name: e.name,
+        price: null,
+        change: null,
+        changePercent: null,
+        volume: null,
+        high: null,
+        low: null,
+        marketCap: e.aumB * 1e9,
+        type: 'etf'
+      };
+    });
+  }
+
   // State
   var state = {
     etfs: [],
@@ -140,8 +212,13 @@
           state.loading = false;
           applyData();
         } else {
+          // 3) Final fallback: embedded list (names + AUM, no live prices)
+          state.etfs = fallbackEtfs();
+          state.updatedAt = null;
+          state.source = 'fallback';
           state.loading = false;
-          setStatus('Failed to load ETF data.', false);
+          applyData();
+          setStatus('Live prices unavailable \u2014 showing fund list only.', false);
         }
         console.error(e);
       });

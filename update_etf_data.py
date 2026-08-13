@@ -125,12 +125,30 @@ def main():
     # Yahoo limits spark to 20 symbols per request.
     batches = [symbols[i:i+20] for i in range(0, len(symbols), 20)]
 
+    # Load previous data so we can preserve values if a batch fails.
+    prev = {}
+    try:
+        with open("etf-data.json", "r", encoding="utf-8") as f:
+            prev_data = json.load(f)
+        for e in prev_data.get("etfs", []):
+            prev[e["symbol"]] = e
+    except Exception:
+        pass
+
     merged = {}
     for batch in batches:
-        try:
-            merged.update(fetch_batch(batch))
-        except Exception as e:
-            print("Warning: batch fetch failed:", e, file=sys.stderr)
+        # Retry each batch up to 3 times (Yahoo can rate-limit).
+        for attempt in range(3):
+            try:
+                merged.update(fetch_batch(batch))
+                break
+            except Exception as e:
+                print(f"Warning: batch {batch[0]}..{batch[-1]} attempt {attempt+1} failed: {e}", file=sys.stderr)
+                if attempt == 2:
+                    # Preserve previous values for symbols in this batch.
+                    for sym in batch:
+                        if sym in prev:
+                            merged[sym] = prev[sym]
 
     # Build final etf list, preserving AUM order.
     etfs = []
