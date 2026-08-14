@@ -312,7 +312,6 @@
         '<td class="num ' + changeCls + '">' + fmtChangePct(item.changePercent) + '</td>' +
         '<td class="num muted">' + fmtVolume(item.volume) + '</td>' +
         '<td class="num marketcap">' + fmtMoney(item.marketCap) + '</td>' +
-        '<td class="num muted">' + fmtPrice(item.high) + '</td>' +
         '<td class="num muted">' + fmtPrice(item.low) + '</td>';
 
       body.appendChild(tr);
