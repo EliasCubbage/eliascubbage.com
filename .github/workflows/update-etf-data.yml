@@ -40,7 +40,9 @@ jobs:
           if git diff --cached --quiet; then
             echo "No changes to etf-data.json"
           else
-            git commit -m "Update ETF data [skip ci]"
+            # NOTE: no "[skip ci]" here — that would also skip the Pages deploy
+            # workflow, so fresh etf-data.json would never reach the live site.
+            git commit -m "Update ETF data"
             # Rebase onto latest remote before pushing so the push can't fail
             # if the remote moved (e.g. a manual commit landed meanwhile).
             git pull --rebase origin main
